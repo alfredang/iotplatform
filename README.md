@@ -1,16 +1,53 @@
-# IoTFlow — Lightweight, Self-Hosted IoT Platform
+<div align="center">
 
-A clean, modern, beginner-friendly IoT platform. Connect devices over **MQTT** or
-**HTTP**, stream real-time telemetry, build simple dashboards with charts, gauges
-and maps, and get alerts when something goes wrong. Free, self-hosted and
-Coolify/Docker-ready.
+# IoTFlow
 
-Inspired by OpenRemote, ThingsBoard and AWS IoT Application Kit — without the
-heavyweight complexity.
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
+[![License](https://img.shields.io/badge/license-MIT-green)](#license)
+
+**A lightweight, modern, self-hosted IoT platform — connect devices, stream real-time data, build dashboards and get alerts.**
+
+[Report Bug](https://github.com/alfredang/iotplatform/issues) · [Request Feature](https://github.com/alfredang/iotplatform/issues)
+
+</div>
 
 ---
 
-## Features
+## Screenshots
+
+### Landing page
+![Landing page](screenshot.png)
+
+### Real-time dashboard
+![Dashboard](dashboard.png)
+
+---
+
+## 🚀 Demo Login
+
+After running the app and seeding demo data (`npm run db:seed`):
+
+| Field | Value |
+|---|---|
+| **Email** | `admin@demo.io` |
+| **Password** | `password123` |
+
+The demo seed creates an admin user, several devices, ~24h of telemetry, an alert rule and a fully populated dashboard so you can explore immediately.
+
+---
+
+## About
+
+IoTFlow is a free, self-hosted IoT platform inspired by OpenRemote, ThingsBoard
+and AWS IoT Application Kit — without the heavyweight complexity. It is designed
+to be beginner-friendly, fast and mobile-first, with a built-in dark theme.
+
+### Key Features
 
 - **One-page landing site** with an enquiry form (saved to PostgreSQL)
 - **Authentication** — email/password, OTP email codes, Google & GitHub OAuth
@@ -19,7 +56,7 @@ heavyweight complexity.
 - **Device management** — add/edit/delete, status & last-seen, device tokens
 - **Guided connection wizard** — 6 steps with copy-paste code for ESP32, Arduino,
   Raspberry Pi, MQTT clients and cURL
-- **Telemetry** — JSON ingestion over HTTP and MQTT, normalized into metrics
+- **Telemetry** — JSON ingestion over **HTTP** and **MQTT**, normalized into metrics
 - **Real-time dashboard** — auto-refreshing summary cards + customizable widgets
   (number, line, bar, gauge, device status, alert list, map)
 - **Alerts** — threshold rules (`>`, `<`, `≥`, `≤`, `=`) and device-offline rules,
@@ -46,30 +83,77 @@ heavyweight complexity.
 
 ---
 
-## Quick Start (Docker — recommended)
+## Architecture
+
+```
+                         ┌──────────────────────────────┐
+   Browser  ───────────▶ │   Next.js 16 (web)           │
+                         │   • Marketing + Auth pages    │
+                         │   • Dashboard (SWR, 5s poll)  │
+                         │   • API route handlers        │
+                         └───────────┬───────────────────┘
+                                     │  Prisma
+   Devices ──HTTP POST──▶ /api/telemetry ──┐
+                                     │      ▼
+   Devices ──MQTT pub──▶ ┌───────────┴──┐  ┌──────────────┐
+                         │ MQTT Worker  │  │ PostgreSQL   │
+   ┌──────────────┐      │ • subscribe  │─▶│ devices,     │
+   │ Mosquitto    │◀─────┤ • ingest     │  │ telemetry,   │
+   │ broker       │      │ • offline    │  │ alerts, ...  │
+   └──────────────┘      │   sweep      │  └──────────────┘
+                         └──────────────┘
+        Shared ingest + alert-evaluation engine (lib/telemetry, lib/alerts)
+```
+
+---
+
+## Project Structure
+
+```
+iotplatform/
+├── app/
+│   ├── (marketing)/        # landing page
+│   ├── (auth)/             # login, register, forgot-password, verify-otp
+│   ├── (dashboard)/        # dashboard, devices, telemetry, alerts, maps, api-keys, settings
+│   └── api/                # route handlers (devices, telemetry, alerts, ...)
+├── components/             # layout, dashboard, devices, charts, maps, auth, ui
+├── lib/                    # auth, db, mqtt, telemetry, alerts, validation, tokens
+├── prisma/                 # schema.prisma, seed.ts, migrations
+├── worker/                 # mqtt-ingest.ts (long-running ingestion worker)
+├── mosquitto/              # mosquitto.conf
+├── docs/                   # connecting-a-device.md
+├── Dockerfile
+└── docker-compose.yml
+```
+
+---
+
+## Getting Started
+
+### Quick Start (Docker — recommended)
 
 ```bash
+git clone https://github.com/alfredang/iotplatform.git
+cd iotplatform
 cp .env.example .env
 # Edit .env: set NEXTAUTH_SECRET (openssl rand -base64 32) and any OAuth/SMTP.
 
 docker compose up -d --build
-# Web:    http://localhost:3000
-# MQTT:   localhost:1883
+# Web:  http://localhost:3000
+# MQTT: localhost:1883
 ```
 
-Load demo data once (a demo admin, devices, telemetry, an alert and a dashboard):
+Load demo data once (demo admin, devices, telemetry, alert, dashboard):
 
 ```bash
 docker compose exec web npm run db:seed
 # Demo login: admin@demo.io / password123
 ```
 
-The stack runs four services: `web` (Next.js), `worker` (MQTT ingestion), `db`
-(PostgreSQL) and `mqtt` (Mosquitto).
+The stack runs four services: `web` (Next.js), `worker` (MQTT ingestion),
+`db` (PostgreSQL) and `mqtt` (Mosquitto).
 
----
-
-## Local Development
+### Local Development
 
 Requirements: Node.js 22+, a PostgreSQL database, (optional) an MQTT broker.
 
@@ -78,18 +162,13 @@ npm install
 cp .env.example .env        # point DATABASE_URL at your Postgres
 
 npm run db:migrate          # create tables
-npm run db:seed             # optional demo data
+npm run db:seed             # optional demo data (admin@demo.io / password123)
 
 npm run dev                 # http://localhost:3000
+npm run worker              # in a second terminal: MQTT ingestion worker
 ```
 
-Run the MQTT ingestion worker in a second terminal (needs a broker + DATABASE_URL):
-
-```bash
-npm run worker
-```
-
-### Environment variables
+### Environment Variables
 
 See [`.env.example`](.env.example). Key ones:
 
@@ -104,15 +183,6 @@ See [`.env.example`](.env.example). Key ones:
 | `MQTT_BROKER_URL` | Broker the worker connects to |
 | `NEXT_PUBLIC_MQTT_HOST` | `host:port` shown in device sample code |
 | `DEVICE_OFFLINE_SECONDS` | Mark a device offline after this idle period |
-
-### PostgreSQL & Prisma
-
-```bash
-npm run db:migrate     # dev migrations (prisma migrate dev)
-npm run db:deploy      # apply migrations in production
-npm run db:studio      # browse data in Prisma Studio
-npm run db:seed        # (re)seed demo data — DESTRUCTIVE, clears existing rows
-```
 
 ---
 
@@ -130,10 +200,9 @@ curl -X POST https://your-host/api/telemetry \
   -d '{"temperature": 28.5, "humidity": 65, "voltage": 3.7}'
 ```
 
-- Use a **device token** (`dev_...`) to identify the device directly, **or** an
-  **account API key** (`iot_...`) plus a `"deviceId"` field in the body.
-- GPS is supported as `{"gps": {"lat": 1.3, "lng": 103.8}}` or top-level
-  `lat`/`lng` — it updates the device's map location.
+Use a **device token** (`dev_...`) to identify the device directly, or an
+**account API key** (`iot_...`) plus a `"deviceId"` field in the body. GPS is
+recognised (`{"gps":{"lat":1.3,"lng":103.8}}`) and updates the map location.
 
 ### MQTT
 
@@ -145,8 +214,7 @@ mosquitto_pub -h localhost -p 1883 \
   -m '{"token":"dev_xxx","temperature":28.5,"humidity":65}'
 ```
 
-The worker subscribes to `devices/+/telemetry`, authenticates by the embedded
-token, stores telemetry and evaluates alert rules.
+See [docs/connecting-a-device.md](docs/connecting-a-device.md) for ESP32/Arduino/Pi examples.
 
 ---
 
@@ -171,40 +239,57 @@ token, stores telemetry and evaluates alert rules.
 
 ---
 
-## Deploying to Coolify
+## Deployment
+
+### Coolify
 
 1. Push this repo to GitHub/GitLab.
-2. In Coolify, create a new resource → **Docker Compose** and point it at this
-   repo (it uses `docker-compose.yml`).
-3. Set environment variables (at minimum `NEXTAUTH_SECRET`, `NEXTAUTH_URL` to your
-   public domain). Add OAuth/SMTP if desired.
+2. In Coolify, create a new resource → **Docker Compose** pointing at this repo.
+3. Set env vars (at minimum `NEXTAUTH_SECRET`, `NEXTAUTH_URL` to your domain).
 4. Deploy. Coolify builds the shared image and starts `web`, `worker`, `db` and
    `mqtt`. Migrations run automatically on web startup.
-5. (Optional) Seed demo data once via Coolify's terminal:
-   `npm run db:seed`.
+5. (Optional) Seed demo data once: `npm run db:seed`.
 
 > The platform also runs as a single web container against an external managed
 > Postgres + MQTT broker — just set the matching env vars.
 
 ---
 
-## Project Structure
+## Contributing
 
-```
-app/
-  (marketing)/        landing page
-  (auth)/             login, register, forgot-password, verify-otp
-  (dashboard)/        dashboard, devices, telemetry, alerts, maps, api-keys, settings
-  api/                route handlers
-components/           layout, dashboard, devices, charts, maps, auth, ui
-lib/                  auth, db, mqtt, telemetry, alerts, validation, tokens
-prisma/              schema.prisma, seed.ts, migrations
-worker/              mqtt-ingest.ts
-mosquitto/           mosquitto.conf
-```
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing`)
+5. Open a Pull Request
+
+---
+
+## Developed By
+
+<div align="center">
+
+**Powered by [Tertiary Infotech Academy Pte Ltd](https://www.tertiarycourses.com.sg/)**
+
+</div>
+
+## Acknowledgements
+
+- Inspired by [OpenRemote](https://openremote.io), [ThingsBoard](https://thingsboard.io)
+  and [AWS IoT Application Kit](https://github.com/awslabs/iot-app-kit)
+- Built with [Next.js](https://nextjs.org), [Prisma](https://www.prisma.io),
+  [Auth.js](https://authjs.dev), [Recharts](https://recharts.org),
+  [Leaflet](https://leafletjs.com) and [Eclipse Mosquitto](https://mosquitto.org)
+- Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors
 
 ---
 
 ## License
 
-Free to self-host and adapt. No warranty.
+MIT — free to self-host and adapt.
+
+<div align="center">
+
+⭐ If you find this project useful, please consider giving it a star!
+
+</div>
