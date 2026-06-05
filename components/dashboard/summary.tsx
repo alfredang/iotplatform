@@ -4,6 +4,7 @@ import useSWR from "swr";
 import Link from "next/link";
 import { Cpu, Wifi, WifiOff, TriangleAlert } from "lucide-react";
 import { fetcher } from "@/lib/client";
+import { useProject, withProject } from "@/components/project/project-context";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge, StatusDot } from "@/components/ui/badge";
 import { EmptyState, Spinner } from "@/components/ui/misc";
@@ -35,9 +36,12 @@ const STAT_DEFS = [
 ] as const;
 
 export function DashboardSummary() {
-  const { data, isLoading } = useSWR<Summary>("/api/dashboard/summary", fetcher, {
-    refreshInterval: 5000,
-  });
+  const { projectId } = useProject();
+  const { data, isLoading } = useSWR<Summary>(
+    withProject("/api/dashboard/summary", projectId),
+    fetcher,
+    { refreshInterval: 5000 },
+  );
 
   return (
     <div className="space-y-6">

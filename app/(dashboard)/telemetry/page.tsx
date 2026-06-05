@@ -4,6 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { Activity } from "lucide-react";
 import { fetcher } from "@/lib/client";
+import { useProject, withProject } from "@/components/project/project-context";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Select } from "@/components/ui/input";
 import { EmptyState, PageHeader, Spinner } from "@/components/ui/misc";
@@ -20,17 +21,21 @@ type Row = {
 };
 
 export default function TelemetryPage() {
+  const { projectId } = useProject();
   const [deviceId, setDeviceId] = useState("");
   const [metric, setMetric] = useState("");
 
-  const { data: devData } = useSWR<{ devices: Device[] }>("/api/devices", fetcher);
+  const { data: devData } = useSWR<{ devices: Device[] }>(
+    withProject("/api/devices", projectId),
+    fetcher,
+  );
   const { data: metricData } = useSWR<{ metrics: string[] }>(
     deviceId ? `/api/devices/${deviceId}/telemetry?limit=1` : null,
     fetcher,
   );
 
   const { data, isLoading } = useSWR<{ telemetry: Row[] }>(
-    buildListUrl(deviceId, metric, devData?.devices),
+    buildListUrl(deviceId, metric, devData?.devices, projectId),
     fetcher,
     { refreshInterval: 5000 },
   );
@@ -139,9 +144,10 @@ export default function TelemetryPage() {
 function buildListUrl(
   deviceId: string,
   metric: string,
-  devices?: Device[],
+  devices: Device[] | undefined,
+  projectId: string,
 ): string {
-  const params = new URLSearchParams({ limit: "100" });
+  const params = new URLSearchParams({ limit: "100", projectId });
   if (deviceId && devices) {
     const dev = devices.find((d) => d.id === deviceId) as
       | (Device & { deviceId?: string })

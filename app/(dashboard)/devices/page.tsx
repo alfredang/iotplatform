@@ -4,6 +4,7 @@ import useSWR from "swr";
 import Link from "next/link";
 import { Cpu, PlusCircle, Trash2, ChevronRight } from "lucide-react";
 import { apiFetch, fetcher } from "@/lib/client";
+import { useProject, withProject } from "@/components/project/project-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge, StatusDot } from "@/components/ui/badge";
@@ -23,8 +24,9 @@ type Device = {
 };
 
 export default function DevicesPage() {
+  const { projectId } = useProject();
   const { data, isLoading, mutate } = useSWR<{ devices: Device[] }>(
-    "/api/devices",
+    withProject("/api/devices", projectId),
     fetcher,
     { refreshInterval: 10000 },
   );

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { Bell, CheckCircle2, Trash2 } from "lucide-react";
 import { apiFetch, fetcher } from "@/lib/client";
+import { useProject, withProject } from "@/components/project/project-context";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,8 +43,9 @@ const OPERATORS = [
 ];
 
 export default function AlertsPage() {
+  const { projectId } = useProject();
   const { data, isLoading, mutate } = useSWR<{ alerts: Alert[]; rules: Rule[] }>(
-    "/api/alerts",
+    withProject("/api/alerts", projectId),
     fetcher,
     { refreshInterval: 5000 },
   );
@@ -212,7 +214,11 @@ function CreateRuleModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const { data: devData } = useSWR<{ devices: Device[] }>("/api/devices", fetcher);
+  const { projectId } = useProject();
+  const { data: devData } = useSWR<{ devices: Device[] }>(
+    withProject("/api/devices", projectId),
+    fetcher,
+  );
   const [name, setName] = useState("");
   const [deviceId, setDeviceId] = useState("");
   const [operator, setOperator] = useState("GT");

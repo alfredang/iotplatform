@@ -10,8 +10,8 @@ export class AuthError extends Error {
   }
 }
 
-/** Role hierarchy: ADMIN can do everything a USER can; USER more than VIEWER. */
-const RANK: Record<Role, number> = { VIEWER: 1, USER: 2, ADMIN: 3 };
+/** Role hierarchy: ADMIN outranks USER. */
+const RANK: Record<Role, number> = { USER: 1, ADMIN: 2 };
 
 export function roleAtLeast(role: Role, min: Role): boolean {
   return RANK[role] >= RANK[min];
@@ -27,16 +27,22 @@ export async function requireSession() {
 }
 
 /**
- * For Route Handlers. Throws AuthError (caught and mapped to 401/403) instead
- * of redirecting. Returns the authenticated user.
+ * For Route Handlers. Throws AuthError (mapped to 401/403) instead of
+ * redirecting. Returns the authenticated user. Any signed-in user is at least
+ * USER; pass "ADMIN" to require an administrator.
  */
-export async function requireApiUser(minRole: Role = "VIEWER") {
+export async function requireApiUser(minRole: Role = "USER") {
   const session = await auth();
   if (!session?.user) throw new AuthError("Unauthorized", 401);
   if (!roleAtLeast(session.user.role, minRole)) {
     throw new AuthError("Forbidden", 403);
   }
   return session.user;
+}
+
+/** Convenience guard for admin-only API routes. */
+export async function requireAdminApi() {
+  return requireApiUser("ADMIN");
 }
 
 /** Maps thrown errors to a JSON Response for API routes. */

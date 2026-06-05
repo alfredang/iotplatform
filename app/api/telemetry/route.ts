@@ -7,6 +7,7 @@ import {
 } from "@/lib/telemetry/ingest";
 import { handleApiError } from "@/lib/api";
 import { requireApiUser } from "@/lib/auth/rbac";
+import { resolveProject } from "@/lib/projects";
 
 export const dynamic = "force-dynamic";
 
@@ -77,14 +78,19 @@ export async function POST(req: Request) {
  */
 export async function GET(req: Request) {
   try {
-    const user = await requireApiUser("VIEWER");
+    const user = await requireApiUser();
     const url = new URL(req.url);
     const publicId = url.searchParams.get("deviceId");
     const metric = url.searchParams.get("metric");
     const limit = Math.min(Number(url.searchParams.get("limit") || 100), 1000);
+    const project = await resolveProject(user.id, url.searchParams.get("projectId"));
 
     const deviceFilter = await prisma.device.findMany({
-      where: { ownerId: user.id, ...(publicId ? { deviceId: publicId } : {}) },
+      where: {
+        ownerId: user.id,
+        projectId: project.id,
+        ...(publicId ? { deviceId: publicId } : {}),
+      },
       select: { id: true },
     });
 

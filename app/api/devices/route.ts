@@ -3,6 +3,7 @@ import { requireApiUser } from "@/lib/auth/rbac";
 import { deviceCreateSchema } from "@/lib/validation";
 import { handleApiError, parseBody } from "@/lib/api";
 import { generateDeviceToken } from "@/lib/tokens";
+import { resolveProject } from "@/lib/projects";
 
 function slugify(s: string): string {
   return s
@@ -12,18 +13,20 @@ function slugify(s: string): string {
     .slice(0, 60);
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const user = await requireApiUser("VIEWER");
+    const user = await requireApiUser();
+    const url = new URL(req.url);
+    const project = await resolveProject(user.id, url.searchParams.get("projectId"));
     const devices = await prisma.device.findMany({
-      where: { ownerId: user.id },
+      where: { ownerId: user.id, projectId: project.id },
       orderBy: { createdAt: "desc" },
       include: {
         _count: { select: { telemetry: true } },
         alerts: { where: { status: "ACTIVE" }, select: { id: true } },
       },
     });
-    return Response.json({ devices });
+    return Response.json({ devices, projectId: project.id });
   } catch (err) {
     return handleApiError(err);
   }
@@ -32,6 +35,8 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const user = await requireApiUser("USER");
+    const url = new URL(req.url);
+    const project = await resolveProject(user.id, url.searchParams.get("projectId"));
     const data = await parseBody(req, deviceCreateSchema);
 
     let deviceId = data.deviceId || slugify(data.name) || "device";
@@ -53,6 +58,7 @@ export async function POST(req: Request) {
         longitude: data.longitude,
         protocol: data.protocol,
         ownerId: user.id,
+        projectId: project.id,
         tokens: {
           create: { tokenHash: token.hash, prefix: token.prefix },
         },

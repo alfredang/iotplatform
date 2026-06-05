@@ -6,7 +6,7 @@ import { handleApiError, parseBody } from "@/lib/api";
 /** PUT /api/settings — update the signed-in user's profile/preferences. */
 export async function PUT(req: Request) {
   try {
-    const user = await requireApiUser("VIEWER");
+    const user = await requireApiUser();
     const data = await parseBody(req, settingsSchema);
 
     const updated = await prisma.user.update({

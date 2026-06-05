@@ -17,7 +17,6 @@ datasource db {
 enum Role {
   ADMIN
   USER
-  VIEWER
 }
 
 enum Protocol {
@@ -67,6 +66,7 @@ model User {
   image             String?
   hashedPassword    String?
   role              Role      @default(USER)
+  disabled          Boolean   @default(false) // deactivated users cannot sign in
   orgName           String?
   notificationEmail String?
   theme             String    @default("dark")
@@ -78,6 +78,7 @@ model User {
   devices    Device[]
   dashboards Dashboard[]
   apiKeys    ApiKey[]
+  projects   Project[]
 }
 
 // Auth.js adapter models
@@ -145,10 +146,12 @@ model Device {
   status    DeviceStatus @default(OFFLINE)
   lastSeen  DateTime?
   ownerId   String
+  projectId String
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
   owner      User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tokens     DeviceToken[]
   telemetry  Telemetry[]
   alertRules AlertRule[]
@@ -156,6 +159,7 @@ model Device {
   widgets    Widget[]
 
   @@index([ownerId])
+  @@index([projectId])
 }
 
 model DeviceToken {
@@ -195,14 +199,17 @@ model Dashboard {
   id        String   @id @default(cuid())
   name      String   @default("My Dashboard")
   ownerId   String
+  projectId String
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   owner   User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   widgets Widget[]
 
   @@index([ownerId])
+  @@index([projectId])
 }
 
 model Widget {
@@ -292,4 +299,39 @@ model Enquiry {
   phone     String?
   message   String
   createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Projects — each project is a self-contained workspace (devices + dashboard)
+// ---------------------------------------------------------------------------
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner      User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  devices    Device[]
+  dashboards Dashboard[]
+
+  @@index([ownerId])
+}
+
+// ---------------------------------------------------------------------------
+// Global app configuration (admin-managed). Single row, id = 1.
+// ---------------------------------------------------------------------------
+
+model AppConfig {
+  id                 Int      @id @default(1)
+  smtpHost           String?
+  smtpPort           Int      @default(587)
+  smtpUser           String?
+  smtpPassword       String?
+  smtpFrom           String?
+  alertEmail         String? // default recipient for alert notifications
+  emailAlertsEnabled Boolean  @default(false)
+  updatedAt          DateTime @updatedAt @default(now())
 }

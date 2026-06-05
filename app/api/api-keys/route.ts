@@ -6,7 +6,7 @@ import { generateApiKey } from "@/lib/tokens";
 
 export async function GET() {
   try {
-    const user = await requireApiUser("VIEWER");
+    const user = await requireApiUser();
     const keys = await prisma.apiKey.findMany({
       where: { ownerId: user.id },
       orderBy: { createdAt: "desc" },

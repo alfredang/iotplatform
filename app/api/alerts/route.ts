@@ -3,19 +3,21 @@ import { requireApiUser } from "@/lib/auth/rbac";
 import { alertRuleSchema } from "@/lib/validation";
 import { handleApiError, parseBody } from "@/lib/api";
 import { getOwnedDevice } from "@/lib/devices";
+import { resolveProject } from "@/lib/projects";
 
 export const dynamic = "force-dynamic";
 
 /** GET /api/alerts — active + recent alerts and the user's alert rules. */
 export async function GET(req: Request) {
   try {
-    const user = await requireApiUser("VIEWER");
+    const user = await requireApiUser();
     const url = new URL(req.url);
     const status = url.searchParams.get("status"); // ACTIVE | RESOLVED | null
+    const project = await resolveProject(user.id, url.searchParams.get("projectId"));
 
     const deviceIds = (
       await prisma.device.findMany({
-        where: { ownerId: user.id },
+        where: { ownerId: user.id, projectId: project.id },
         select: { id: true },
       })
     ).map((d) => d.id);

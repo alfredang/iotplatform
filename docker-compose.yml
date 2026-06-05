@@ -45,8 +45,10 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-iot}:${POSTGRES_PASSWORD:-iot}@db:5432/${POSTGRES_DB:-iotplatform}?schema=public
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      AUTH_SECRET: ${NEXTAUTH_SECRET}
+      # A default secret is provided so `docker compose up` works out of the box.
+      # CHANGE THIS for any real deployment (openssl rand -base64 32).
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-insecure-secret-change-me-0123456789abcdef}
+      AUTH_SECRET: ${NEXTAUTH_SECRET:-dev-insecure-secret-change-me-0123456789abcdef}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       AUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       AUTH_TRUST_HOST: "true"

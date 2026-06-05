@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Check, Cpu, Radio, Globe, ArrowRight, ArrowLeft, PartyPopper } from "lucide-react";
 import { apiFetch, fetcher } from "@/lib/client";
+import { useProject, withProject } from "@/components/project/project-context";
 import { buildSnippets } from "@/lib/sample-code";
 import { Card, CardBody } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ const STEPS = ["Name", "Protocol", "Token", "Code", "Test", "Live"];
 
 export function ConnectionWizard() {
   const router = useRouter();
+  const { projectId } = useProject();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [protocol, setProtocol] = useState<Protocol>("HTTP");
@@ -56,10 +58,13 @@ export function ConnectionWizard() {
     setCreating(true);
     setError("");
     try {
-      const res = await apiFetch<{ device: CreatedDevice; token: string }>("/api/devices", {
-        method: "POST",
-        body: JSON.stringify({ name, protocol }),
-      });
+      const res = await apiFetch<{ device: CreatedDevice; token: string }>(
+        withProject("/api/devices", projectId),
+        {
+          method: "POST",
+          body: JSON.stringify({ name, protocol }),
+        },
+      );
       setDevice(res.device);
       setToken(res.token);
       setStep(2);

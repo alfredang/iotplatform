@@ -3,6 +3,7 @@
 import useSWR from "swr";
 import { MapPin } from "lucide-react";
 import { fetcher } from "@/lib/client";
+import { useProject, withProject } from "@/components/project/project-context";
 import { DeviceMap, type MapDevice } from "@/components/maps/device-map";
 import { Card, CardBody } from "@/components/ui/card";
 import { EmptyState, PageHeader, Spinner } from "@/components/ui/misc";
@@ -20,9 +21,12 @@ type Device = {
 };
 
 export default function MapsPage() {
-  const { data, isLoading } = useSWR<{ devices: Device[] }>("/api/devices", fetcher, {
-    refreshInterval: 10000,
-  });
+  const { projectId } = useProject();
+  const { data, isLoading } = useSWR<{ devices: Device[] }>(
+    withProject("/api/devices", projectId),
+    fetcher,
+    { refreshInterval: 10000 },
+  );
 
   const located: MapDevice[] = (data?.devices ?? [])
     .filter((d) => d.latitude != null && d.longitude != null)

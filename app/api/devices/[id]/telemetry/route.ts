@@ -13,7 +13,7 @@ type Ctx = { params: Promise<{ id: string }> };
  */
 export async function GET(req: Request, { params }: Ctx) {
   try {
-    const user = await requireApiUser("VIEWER");
+    const user = await requireApiUser();
     const { id } = await params;
     await getOwnedDevice(id, user.id);
 

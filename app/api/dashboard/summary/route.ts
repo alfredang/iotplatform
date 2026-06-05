@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { requireApiUser } from "@/lib/auth/rbac";
 import { handleApiError } from "@/lib/api";
+import { resolveProject } from "@/lib/projects";
 
 export const dynamic = "force-dynamic";
 
@@ -8,12 +9,14 @@ export const dynamic = "force-dynamic";
  * GET /api/dashboard/summary
  * Counts, latest telemetry and recent activity for the signed-in user.
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const user = await requireApiUser("VIEWER");
+    const user = await requireApiUser();
+    const url = new URL(req.url);
+    const project = await resolveProject(user.id, url.searchParams.get("projectId"));
 
     const devices = await prisma.device.findMany({
-      where: { ownerId: user.id },
+      where: { ownerId: user.id, projectId: project.id },
       select: { id: true, name: true, deviceId: true, status: true, lastSeen: true },
     });
     const deviceIds = devices.map((d) => d.id);

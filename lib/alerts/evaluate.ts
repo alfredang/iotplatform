@@ -1,6 +1,34 @@
 import type { AlertOperator } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { metricUnit } from "@/lib/utils";
+import { getMailConfig, sendEmail } from "@/lib/email";
+
+/**
+ * Email a triggered alert to the configured recipient when email alerts are
+ * enabled (Admin → Email settings). Failures never block ingestion.
+ */
+async function notifyAlert(
+  device: { name: string; ownerId: string },
+  message: string,
+): Promise<void> {
+  try {
+    const cfg = await getMailConfig();
+    if (!cfg.emailAlertsEnabled) return;
+    let to = cfg.alertEmail;
+    if (!to) {
+      const owner = await prisma.user.findUnique({
+        where: { id: device.ownerId },
+        select: { notificationEmail: true, email: true },
+      });
+      to = owner?.notificationEmail || owner?.email || null;
+    }
+    if (!to) return;
+    await sendEmail({ to, subject: `IoT alert: ${device.name}`, text: message });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("alert email failed:", e);
+  }
+}
 
 function compare(op: AlertOperator, value: number, threshold: number): boolean {
   switch (op) {
@@ -54,14 +82,11 @@ export async function evaluateMetric(
 
     const device = await prisma.device.findUnique({ where: { id: deviceId } });
     const unit = metricUnit(metric);
+    const message = `${device?.name ?? "Device"}: ${metric} ${value}${unit} ${OP_TEXT[rule.operator]} threshold ${rule.threshold}${unit}`;
     await prisma.alert.create({
-      data: {
-        ruleId: rule.id,
-        deviceId,
-        value,
-        message: `${device?.name ?? "Device"}: ${metric} ${value}${unit} ${OP_TEXT[rule.operator]} threshold ${rule.threshold}${unit}`,
-      },
+      data: { ruleId: rule.id, deviceId, value, message },
     });
+    if (device) await notifyAlert(device, message);
     raised++;
   }
   return raised;
@@ -106,13 +131,11 @@ export async function evaluateOffline(offlineSeconds = 120): Promise<{
       });
       if (existing) continue;
 
+      const message = `${device.name}: offline for more than ${rule.durationSecs}s`;
       await prisma.alert.create({
-        data: {
-          ruleId: rule.id,
-          deviceId: device.id,
-          message: `${device.name}: offline for more than ${rule.durationSecs}s`,
-        },
+        data: { ruleId: rule.id, deviceId: device.id, message },
       });
+      await notifyAlert(device, message);
       raised++;
     }
   }

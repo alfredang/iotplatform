@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { apiFetch, fetcher } from "@/lib/client";
+import { useProject, withProject } from "@/components/project/project-context";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/input";
@@ -25,6 +26,7 @@ const NEEDS_DEVICE = ["NUMBER", "LINE", "BAR", "GAUGE", "STATUS"];
 const NEEDS_METRIC = ["NUMBER", "LINE", "BAR", "GAUGE"];
 
 export function AddWidget({ onAdded }: { onAdded: () => void }) {
+  const { projectId } = useProject();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<string>("NUMBER");
   const [deviceId, setDeviceId] = useState("");
@@ -35,7 +37,10 @@ export function AddWidget({ onAdded }: { onAdded: () => void }) {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const { data: devData } = useSWR<{ devices: Device[] }>(open ? "/api/devices" : null, fetcher);
+  const { data: devData } = useSWR<{ devices: Device[] }>(
+    open ? withProject("/api/devices", projectId) : null,
+    fetcher,
+  );
   const { data: telData } = useSWR<{ metrics: string[] }>(
     open && deviceId ? `/api/devices/${deviceId}/telemetry?limit=1` : null,
     fetcher,
@@ -58,7 +63,7 @@ export function AddWidget({ onAdded }: { onAdded: () => void }) {
     }
     setSaving(true);
     try {
-      await apiFetch("/api/dashboard/widgets", {
+      await apiFetch(withProject("/api/dashboard/widgets", projectId), {
         method: "POST",
         body: JSON.stringify({
           type,

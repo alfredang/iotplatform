@@ -3,13 +3,15 @@
 import useSWR from "swr";
 import { LayoutGrid } from "lucide-react";
 import { apiFetch, fetcher } from "@/lib/client";
+import { useProject, withProject } from "@/components/project/project-context";
 import { EmptyState, Spinner } from "@/components/ui/misc";
 import { WidgetCard, type Widget } from "./widget-card";
 import { AddWidget } from "./add-widget";
 
 export function WidgetGrid() {
+  const { projectId } = useProject();
   const { data, isLoading, mutate } = useSWR<{ widgets: Widget[] }>(
-    "/api/dashboard/widgets",
+    withProject("/api/dashboard/widgets", projectId),
     fetcher,
     { refreshInterval: 15000 },
   );

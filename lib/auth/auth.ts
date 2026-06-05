@@ -24,7 +24,7 @@ const providers: NextAuthConfig["providers"] = [
       if (!email || !password) return null;
 
       const user = await prisma.user.findUnique({ where: { email } });
-      if (!user?.hashedPassword) return null;
+      if (!user?.hashedPassword || user.disabled) return null;
 
       const ok = await bcrypt.compare(password, user.hashedPassword);
       if (!ok) return null;
@@ -46,6 +46,10 @@ const providers: NextAuthConfig["providers"] = [
 
       const ok = await verifyOtp(email, code, "login");
       if (!ok) return null;
+
+      // Reject deactivated accounts.
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing?.disabled) return null;
 
       // Passwordless: create the account on first OTP login.
       const user = await prisma.user.upsert({
