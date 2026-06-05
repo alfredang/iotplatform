@@ -1,0 +1,88 @@
+# Lightweight IoT Platform — full self-hosted stack.
+#   web    : Next.js app (UI + API)
+#   worker : MQTT ingestion worker + offline sweep
+#   db     : PostgreSQL
+#   mqtt   : Eclipse Mosquitto broker
+#
+# Quick start:
+#   cp .env.example .env   # then edit secrets
+#   docker compose up -d --build
+#   open http://localhost:3000
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-iot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot}
+      POSTGRES_DB: ${POSTGRES_DB:-iotplatform}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-iot} -d ${POSTGRES_DB:-iotplatform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqtt-data:/mosquitto/data
+
+  web:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-iot}:${POSTGRES_PASSWORD:-iot}@db:5432/${POSTGRES_DB:-iotplatform}?schema=public
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      AUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      AUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      AUTH_TRUST_HOST: "true"
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_MQTT_HOST: ${NEXT_PUBLIC_MQTT_HOST:-localhost:1883}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-IoT Platform <no-reply@iotplatform.local>}
+    ports:
+      - "3000:3000"
+    # Apply database migrations, then start the server.
+    # To load demo data once: docker compose exec web npm run db:seed
+    command: ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+
+  worker:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-iot}:${POSTGRES_PASSWORD:-iot}@db:5432/${POSTGRES_DB:-iotplatform}?schema=public
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL:-mqtt://mqtt:1883}
+      MQTT_USERNAME: ${MQTT_USERNAME:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+      DEVICE_OFFLINE_SECONDS: ${DEVICE_OFFLINE_SECONDS:-120}
+    command: ["npm", "run", "worker"]
+
+volumes:
+  db-data:
+  mqtt-data:

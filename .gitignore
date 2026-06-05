@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# prisma generated migration lock is committed; local sqlite/db dumps are not
+*.db
 
 # vercel
 .vercel

@@ -1,0 +1,295 @@
+// Lightweight IoT Platform — Prisma schema
+// Run `npx prisma migrate dev` after editing.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  USER
+  VIEWER
+}
+
+enum Protocol {
+  MQTT
+  HTTP
+  WEBSOCKET
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+}
+
+enum AlertOperator {
+  GT
+  LT
+  GTE
+  LTE
+  EQ
+  OFFLINE
+}
+
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+}
+
+enum WidgetType {
+  NUMBER
+  LINE
+  BAR
+  GAUGE
+  STATUS
+  ALERTS
+  MAP
+}
+
+// ---------------------------------------------------------------------------
+// Auth + Users
+// ---------------------------------------------------------------------------
+
+model User {
+  id                String    @id @default(cuid())
+  name              String?
+  email             String    @unique
+  emailVerified     DateTime?
+  image             String?
+  hashedPassword    String?
+  role              Role      @default(USER)
+  orgName           String?
+  notificationEmail String?
+  theme             String    @default("dark")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  accounts   Account[]
+  sessions   Session[]
+  devices    Device[]
+  dashboards Dashboard[]
+  apiKeys    ApiKey[]
+}
+
+// Auth.js adapter models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Six-digit OTP codes for OTP login / password reset
+model OtpCode {
+  id        String   @id @default(cuid())
+  email     String
+  codeHash  String
+  purpose   String   @default("login") // "login" | "reset"
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+// ---------------------------------------------------------------------------
+// Devices + Telemetry
+// ---------------------------------------------------------------------------
+
+model Device {
+  id        String       @id @default(cuid())
+  name      String
+  type      String       @default("Generic")
+  deviceId  String       @unique // public id used in MQTT topics / payloads
+  location  String?
+  latitude  Float?
+  longitude Float?
+  protocol  Protocol     @default(HTTP)
+  status    DeviceStatus @default(OFFLINE)
+  lastSeen  DateTime?
+  ownerId   String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  owner      User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tokens     DeviceToken[]
+  telemetry  Telemetry[]
+  alertRules AlertRule[]
+  alerts     Alert[]
+  widgets    Widget[]
+
+  @@index([ownerId])
+}
+
+model DeviceToken {
+  id        String    @id @default(cuid())
+  name      String    @default("default")
+  tokenHash String    @unique
+  prefix    String // first chars, shown in UI for identification
+  deviceId  String
+  revoked   Boolean   @default(false)
+  lastUsed  DateTime?
+  createdAt DateTime  @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId])
+}
+
+model Telemetry {
+  id       String   @id @default(cuid())
+  deviceId String
+  ts       DateTime @default(now())
+  metric   String
+  value    Float?
+  payload  Json // full raw JSON payload as received
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([deviceId, ts])
+  @@index([deviceId, metric, ts])
+}
+
+// ---------------------------------------------------------------------------
+// Dashboards + Widgets
+// ---------------------------------------------------------------------------
+
+model Dashboard {
+  id        String   @id @default(cuid())
+  name      String   @default("My Dashboard")
+  ownerId   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  widgets Widget[]
+
+  @@index([ownerId])
+}
+
+model Widget {
+  id          String     @id @default(cuid())
+  dashboardId String
+  type        WidgetType
+  title       String     @default("")
+  deviceId    String?
+  metric      String?
+  config      Json? // extra options: min/max for gauge, color, etc.
+  position    Int        @default(0)
+  createdAt   DateTime   @default(now())
+
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  device    Device?   @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([dashboardId])
+}
+
+// ---------------------------------------------------------------------------
+// Alerts
+// ---------------------------------------------------------------------------
+
+model AlertRule {
+  id           String        @id @default(cuid())
+  name         String
+  deviceId     String
+  metric       String? // null for OFFLINE rules
+  operator     AlertOperator
+  threshold    Float? // null for OFFLINE rules
+  durationSecs Int           @default(0) // e.g. offline for N seconds
+  enabled      Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  device Device  @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  alerts Alert[]
+
+  @@index([deviceId])
+}
+
+model Alert {
+  id          String      @id @default(cuid())
+  ruleId      String
+  deviceId    String
+  message     String
+  value       Float?
+  status      AlertStatus @default(ACTIVE)
+  triggeredAt DateTime    @default(now())
+  resolvedAt  DateTime?
+
+  rule   AlertRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  device Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([deviceId])
+}
+
+// ---------------------------------------------------------------------------
+// API Keys (account-level, used for telemetry submission)
+// ---------------------------------------------------------------------------
+
+model ApiKey {
+  id        String    @id @default(cuid())
+  name      String
+  keyHash   String    @unique
+  prefix    String
+  ownerId   String
+  revoked   Boolean   @default(false)
+  lastUsed  DateTime?
+  createdAt DateTime  @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+}
+
+// ---------------------------------------------------------------------------
+// Marketing enquiries
+// ---------------------------------------------------------------------------
+
+model Enquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  company   String?
+  phone     String?
+  message   String
+  createdAt DateTime @default(now())
+}
