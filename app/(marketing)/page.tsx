@@ -249,6 +249,7 @@ export default function LandingPage() {
           <div className="flex gap-4 text-sm text-muted">
             <Link href="/login" className="hover:text-foreground">Log in</Link>
             <Link href="/register" className="hover:text-foreground">Sign up</Link>
+            <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
           </div>
         </div>
         <div className="border-t border-border">
