@@ -1,3 +1,4 @@
+// deploy test: verifying auto-deploy on push (harmless comment, renders nothing)
 import Link from "next/link";
 import {
   Activity,
