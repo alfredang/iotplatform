@@ -1,4 +1,5 @@
 // deploy test: verifying auto-deploy on push (harmless comment, renders nothing)
+// deploy test #2: confirming GitHub webhook -> Coolify auto-deploy
 import Link from "next/link";
 import {
   Activity,
