@@ -182,12 +182,24 @@ export function ConnectionWizard() {
 
           {/* Step 3: Code */}
           {step === 3 && device && snippets && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Copy sample code</h2>
-              <p className="text-sm text-muted">
-                Paste this into your device firmware or a terminal to send data.
-              </p>
-              <SnippetTabs snippets={protocol === "MQTT" ? snippets.mqtt : snippets.http} />
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold">Send data (uplink)</h2>
+                <p className="text-sm text-muted">
+                  Paste this into your device firmware or a terminal to stream telemetry.
+                </p>
+                <SnippetTabs snippets={protocol === "MQTT" ? snippets.mqtt : snippets.http} />
+              </div>
+              <div className="space-y-3 border-t border-border pt-5">
+                <h2 className="text-lg font-semibold">Control your device (downlink)</h2>
+                <p className="text-sm text-muted">
+                  Receive commands from dashboard buttons, sliders &amp; n8n flows — the
+                  equivalent of Blynk&apos;s <code className="font-mono">BLYNK_WRITE()</code>.
+                  Add a Button, Switch or Slider widget bound to a virtual pin (e.g.{" "}
+                  <code className="font-mono">V1</code>).
+                </p>
+                <SnippetTabs snippets={snippets.control} />
+              </div>
             </div>
           )}
 

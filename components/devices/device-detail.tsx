@@ -219,6 +219,12 @@ export function DeviceDetail({ id }: { id: string }) {
             <SnippetTabs
               snippets={device.protocol === "MQTT" ? snippets.mqtt : snippets.http}
             />
+            <div className="mt-5 border-t border-border pt-4">
+              <p className="mb-3 text-sm font-medium">
+                Control (downlink) — react to dashboard &amp; n8n commands
+              </p>
+              <SnippetTabs snippets={snippets.control} />
+            </div>
           </CardBody>
         </Card>
       )}

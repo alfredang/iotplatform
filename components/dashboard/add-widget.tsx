@@ -13,17 +13,24 @@ import { humanize } from "@/lib/utils";
 type Device = { id: string; name: string };
 
 const TYPES = [
-  { value: "NUMBER", label: "Number card" },
-  { value: "LINE", label: "Line chart" },
-  { value: "BAR", label: "Bar chart" },
-  { value: "GAUGE", label: "Gauge" },
-  { value: "STATUS", label: "Device status" },
-  { value: "ALERTS", label: "Alert list" },
-  { value: "MAP", label: "Map" },
+  { value: "NUMBER", label: "Number card", group: "Display" },
+  { value: "LINE", label: "Line chart", group: "Display" },
+  { value: "BAR", label: "Bar chart", group: "Display" },
+  { value: "GAUGE", label: "Gauge", group: "Display" },
+  { value: "LED", label: "LED indicator", group: "Display" },
+  { value: "STATUS", label: "Device status", group: "Display" },
+  { value: "ALERTS", label: "Alert list", group: "Display" },
+  { value: "MAP", label: "Map", group: "Display" },
+  { value: "BUTTON", label: "Button (push)", group: "Control" },
+  { value: "SWITCH", label: "Switch (toggle)", group: "Control" },
+  { value: "SLIDER", label: "Slider", group: "Control" },
+  { value: "TERMINAL", label: "Terminal (send text)", group: "Control" },
 ] as const;
 
-const NEEDS_DEVICE = ["NUMBER", "LINE", "BAR", "GAUGE", "STATUS"];
-const NEEDS_METRIC = ["NUMBER", "LINE", "BAR", "GAUGE"];
+// Display widgets read telemetry; control widgets write to a virtual pin.
+const NEEDS_DEVICE = ["NUMBER", "LINE", "BAR", "GAUGE", "STATUS", "LED", "BUTTON", "SWITCH", "SLIDER", "TERMINAL"];
+const NEEDS_METRIC = ["NUMBER", "LINE", "BAR", "GAUGE", "LED"];
+const CONTROL = ["BUTTON", "SWITCH", "SLIDER", "TERMINAL"];
 
 export function AddWidget({ onAdded }: { onAdded: () => void }) {
   const { projectId } = useProject();
@@ -34,8 +41,11 @@ export function AddWidget({ onAdded }: { onAdded: () => void }) {
   const [title, setTitle] = useState("");
   const [min, setMin] = useState("0");
   const [max, setMax] = useState("100");
+  const [pin, setPin] = useState("V1");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const isControl = CONTROL.includes(type);
 
   const { data: devData } = useSWR<{ devices: Device[] }>(
     open ? withProject("/api/devices", projectId) : null,
@@ -61,8 +71,18 @@ export function AddWidget({ onAdded }: { onAdded: () => void }) {
       setError("Select a metric");
       return;
     }
+    if (isControl && !pin.trim()) {
+      setError("Enter a virtual pin");
+      return;
+    }
     setSaving(true);
     try {
+      const config: Record<string, unknown> | undefined =
+        type === "GAUGE" || type === "SLIDER"
+          ? { min: Number(min), max: Number(max), ...(isControl ? { pin: pin.trim() } : {}) }
+          : isControl
+            ? { pin: pin.trim() }
+            : undefined;
       await apiFetch(withProject("/api/dashboard/widgets", projectId), {
         method: "POST",
         body: JSON.stringify({
@@ -70,7 +90,7 @@ export function AddWidget({ onAdded }: { onAdded: () => void }) {
           title,
           deviceId: NEEDS_DEVICE.includes(type) ? deviceId : null,
           metric: NEEDS_METRIC.includes(type) ? metric : null,
-          config: type === "GAUGE" ? { min: Number(min), max: Number(max) } : undefined,
+          config,
         }),
       });
       setOpen(false);
@@ -102,9 +122,16 @@ export function AddWidget({ onAdded }: { onAdded: () => void }) {
         <div className="space-y-4">
           <Field label="Widget type">
             <Select value={type} onChange={(e) => setType(e.target.value)}>
-              {TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
+              <optgroup label="Display">
+                {TYPES.filter((t) => t.group === "Display").map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Control (device downlink)">
+                {TYPES.filter((t) => t.group === "Control").map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </optgroup>
             </Select>
           </Field>
 
@@ -133,7 +160,13 @@ export function AddWidget({ onAdded }: { onAdded: () => void }) {
             </Field>
           )}
 
-          {type === "GAUGE" && (
+          {isControl && (
+            <Field label="Virtual pin" hint="The control key your device reads, e.g. V1, relay, led">
+              <Input value={pin} onChange={(e) => setPin(e.target.value)} placeholder="V1" />
+            </Field>
+          )}
+
+          {(type === "GAUGE" || type === "SLIDER") && (
             <div className="grid grid-cols-2 gap-3">
               <Field label="Min"><Input type="number" value={min} onChange={(e) => setMin(e.target.value)} /></Field>
               <Field label="Max"><Input type="number" value={max} onChange={(e) => setMax(e.target.value)} /></Field>

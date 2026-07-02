@@ -10,6 +10,7 @@ import {
   FolderKanban,
   Users,
   Mail,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 
@@ -22,6 +23,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/devices/new", label: "Add Device", icon: PlusCircle },
   { href: "/telemetry", label: "Telemetry", icon: Activity },
   { href: "/alerts", label: "Alerts", icon: Bell },
+  { href: "/automations", label: "Automations", icon: Workflow },
   { href: "/maps", label: "Maps", icon: Map },
   { href: "/api-keys", label: "API Keys", icon: KeyRound },
   { href: "/settings", label: "Settings", icon: Settings },

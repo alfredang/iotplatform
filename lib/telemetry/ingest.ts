@@ -2,6 +2,7 @@ import type { Device } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { hashToken } from "@/lib/tokens";
 import { evaluateMetric } from "@/lib/alerts/evaluate";
+import { dispatchEvent } from "@/lib/automations/dispatch";
 import { normalizePayload } from "./normalize";
 
 export type IngestResult = {
@@ -63,6 +64,7 @@ export async function ingestForDevice(
     });
   }
 
+  const cameOnline = device.status !== "ONLINE";
   await prisma.device.update({
     where: { id: device.id },
     data: {
@@ -76,6 +78,21 @@ export async function ingestForDevice(
   let alerts = 0;
   for (const r of readings) {
     alerts += await evaluateMetric(device.id, r.metric, r.value);
+  }
+
+  // Low-code hooks (fire-and-forget → n8n flows).
+  if (cameOnline) void dispatchEvent("DEVICE_ONLINE", device, {});
+  if (readings.length > 0) {
+    const readingMap: Record<string, number | null> = {};
+    for (const r of readings) readingMap[r.metric] = r.value;
+    // One event per metric so metric-filtered automations match cleanly.
+    for (const r of readings) {
+      void dispatchEvent("TELEMETRY", device, {
+        metric: r.metric,
+        value: r.value,
+        readings: readingMap,
+      });
+    }
   }
 
   return { deviceId: device.deviceId, stored: readings.length, alerts };

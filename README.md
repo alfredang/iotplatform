@@ -7,10 +7,11 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io)
+[![n8n](https://img.shields.io/badge/n8n-low--code-EA4B71?logo=n8n&logoColor=white)](https://n8n.io)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
 
-**A lightweight, modern, self-hosted IoT platform — connect devices, stream real-time data, build dashboards and get alerts.**
+**A low-code, self-hosted IoT platform powered by n8n — connect Arduino/ESP32/Raspberry Pi over MQTT & HTTP, control them in real time from web & mobile, and automate everything with drag-and-drop n8n flows.**
 
 [Report Bug](https://github.com/alfredang/iotplatform/issues) · [Request Feature](https://github.com/alfredang/iotplatform/issues)
 
@@ -48,34 +49,42 @@ alert rule and fully populated dashboards so you can explore immediately.
 
 ## About
 
-IoTFlow is a free, self-hosted IoT platform inspired by OpenRemote, ThingsBoard
-and AWS IoT Application Kit — without the heavyweight complexity. It is designed
-to be beginner-friendly, fast and mobile-first, with a built-in dark theme.
+IoTFlow is a free, self-hosted **low-code IoT platform** inspired by Blynk,
+ThingsBoard and OpenRemote — with **n8n** as its automation engine. Connect a
+device in minutes, control it both ways over MQTT/HTTP, build a dashboard for web
+and mobile, and wire device events to no-code n8n flows that notify, control,
+log or call AI.
 
 ### Key Features
 
-- **One-page landing site** with an enquiry form (saved to PostgreSQL)
-- **Authentication** — email/password, OTP email codes, Google & GitHub OAuth
-  (OAuth/SMTP activate automatically when configured)
-- **Roles** — Admin & User. The first registered account becomes Admin.
-- **Projects** — each project is a self-contained workspace with its own devices,
-  dashboard, alerts and map; switch projects from the sidebar. Admins get the
-  same project/dashboard tools as users.
-- **Admin area** — view all users and change roles, **deactivate** or delete
-  accounts (deactivated users can't sign in), manage API keys, and configure
-  SMTP credentials + email-on-alert from the UI (no `.env` edits needed)
-- **View as** — admins can preview the app as a regular user (and switch back)
-- **Device management** — add/edit/delete, status & last-seen, device tokens
-- **Guided connection wizard** — 6 steps with copy-paste code for ESP32, Arduino,
-  Raspberry Pi, MQTT clients and cURL
-- **Telemetry** — JSON ingestion over **HTTP** and **MQTT**, normalized into metrics
+- **Low-code automations with n8n** — forward device events (telemetry, alerts,
+  device online/offline, commands) to n8n Webhook flows; flows call back to
+  control devices. Live connection status + per-automation delivery status.
+  See [docs/n8n-integration.md](docs/n8n-integration.md).
+- **Two-way device control (Blynk-style virtual pins)** — Button, Switch, Slider,
+  Terminal & LED widgets write to a virtual pin; the server persists the value
+  and publishes it to MQTT `devices/<id>/down`. HTTP-only devices poll
+  `GET /api/device/state`.
+- **Connect any device** — guided wizard with copy-paste **uplink + control**
+  code for ESP32, Arduino, Raspberry Pi, generic **C++** (Paho), **Python**
+  (paho/requests), MQTT clients and cURL.
+- **Telemetry** — JSON ingestion over **HTTP** and **MQTT**, normalized into metrics.
 - **Real-time dashboard** — auto-refreshing summary cards + customizable widgets
-  (number, line, bar, gauge, device status, alert list, map)
+  (number, line, bar, gauge, LED, device status, alert list, map + control widgets).
+- **Installable mobile app (PWA)** — add IoTFlow to your phone's home screen.
 - **Alerts** — threshold rules (`>`, `<`, `≥`, `≤`, `=`) and device-offline rules,
-  with active/resolve workflow
-- **Maps** — OpenStreetMap view of GPS-enabled devices
-- **API keys** — account-level keys for HTTP telemetry submission
-- **Dark theme by default** with a light/dark toggle, fully mobile-friendly
+  with active/resolve workflow (and every alert can trigger an n8n flow).
+- **Projects** — each project is a self-contained workspace with its own devices,
+  dashboard, automations, alerts and map; switch projects from the sidebar.
+- **Authentication** — email/password, OTP email codes, Google & GitHub OAuth
+  (OAuth/SMTP activate automatically when configured); Admin & User roles.
+- **Admin area** — manage users/roles, deactivate accounts, API keys and SMTP +
+  email-on-alert from the UI. **View as** lets admins preview as a regular user.
+- **Maps** — OpenStreetMap view of GPS-enabled devices.
+- **API keys** — account-level keys for HTTP telemetry submission and n8n callbacks.
+- **Industry-focused landing page** — agriculture, industrial, smart home, energy,
+  healthcare, buildings, logistics, water and retail use cases.
+- **Dark theme by default** with a light/dark toggle, fully mobile-friendly.
 
 ---
 
@@ -89,7 +98,9 @@ to be beginner-friendly, fast and mobile-first, with a built-in dark theme.
 | Auth | Auth.js v5 (NextAuth) · bcrypt |
 | Charts / Maps | Recharts · React-Leaflet (OpenStreetMap) |
 | Realtime | SWR polling (5s) |
-| MQTT | Eclipse Mosquitto broker + a Node ingestion worker (`mqtt`) |
+| MQTT | Eclipse Mosquitto broker + a Node ingestion worker (`mqtt`); server-side publisher for downlink control |
+| Automation | n8n (webhook events out + REST callbacks in) |
+| Mobile | Installable PWA (web app manifest) |
 | Email | Nodemailer (SMTP) |
 | Deploy | Docker · Docker Compose · Coolify |
 
@@ -98,23 +109,25 @@ to be beginner-friendly, fast and mobile-first, with a built-in dark theme.
 ## Architecture
 
 ```
-                         ┌──────────────────────────────┐
-   Browser  ───────────▶ │   Next.js 16 (web)           │
-                         │   • Marketing + Auth pages    │
-                         │   • Dashboard (SWR, 5s poll)  │
-                         │   • API route handlers        │
+                         ┌──────────────────────────────┐        events (webhook)
+   Browser / Mobile ───▶ │   Next.js 16 (web)           │ ─────────────────────────▶ ┌──────────┐
+   (PWA, control UI)     │   • Marketing + Auth pages    │                             │   n8n    │
+                         │   • Dashboard + Automations   │ ◀───────────────────────── │  flows   │
+                         │   • API route handlers        │   REST callbacks (control)  └──────────┘
                          └───────────┬───────────────────┘
                                      │  Prisma
-   Devices ──HTTP POST──▶ /api/telemetry ──┐
-                                     │      ▼
+   Devices ──HTTP POST──▶ /api/telemetry (uplink) ──┐
+   Devices ──GET────────▶ /api/device/state (downlink poll)
+                                     │               ▼
    Devices ──MQTT pub──▶ ┌───────────┴──┐  ┌──────────────┐
-                         │ MQTT Worker  │  │ PostgreSQL   │
+   (devices/<id>/telemetry) MQTT Worker  │  │ PostgreSQL   │
    ┌──────────────┐      │ • subscribe  │─▶│ devices,     │
    │ Mosquitto    │◀─────┤ • ingest     │  │ telemetry,   │
-   │ broker       │      │ • offline    │  │ alerts, ...  │
-   └──────────────┘      │   sweep      │  └──────────────┘
-                         └──────────────┘
-        Shared ingest + alert-evaluation engine (lib/telemetry, lib/alerts)
+   │ broker       │      │ • offline    │  │ commands,    │
+   └──────┬───────┘      │   sweep      │  │ automations  │
+          │              └──────────────┘  └──────────────┘
+          ▼  devices/<id>/down (control)   Shared ingest + alert + dispatch engine
+   Devices subscribe & act (BLYNK_WRITE-style)   (lib/telemetry, lib/alerts, lib/automations)
 ```
 
 ---
@@ -124,16 +137,18 @@ to be beginner-friendly, fast and mobile-first, with a built-in dark theme.
 ```
 iotplatform/
 ├── app/
-│   ├── (marketing)/        # landing page
+│   ├── (marketing)/        # industry-focused landing page
 │   ├── (auth)/             # login, register, forgot-password, verify-otp
-│   ├── (dashboard)/        # dashboard, devices, telemetry, alerts, maps, api-keys, settings
-│   └── api/                # route handlers (devices, telemetry, alerts, ...)
-├── components/             # layout, dashboard, devices, charts, maps, auth, ui
-├── lib/                    # auth, db, mqtt, telemetry, alerts, validation, tokens
+│   ├── (dashboard)/        # dashboard, devices, telemetry, alerts, automations, maps, api-keys, settings
+│   ├── api/                # route handlers (devices, telemetry, commands, automations, n8n, ...)
+│   └── manifest.ts         # PWA web app manifest
+├── components/             # layout, dashboard (+ control widgets), devices, automations, charts, maps, auth, ui
+├── lib/                    # auth, db, mqtt (topics + publish), telemetry, alerts,
+│                           # commands, automations (dispatch), n8n, validation, tokens
 ├── prisma/                 # schema.prisma, seed.ts, migrations
 ├── worker/                 # mqtt-ingest.ts (long-running ingestion worker)
 ├── mosquitto/              # mosquitto.conf
-├── docs/                   # connecting-a-device.md
+├── docs/                   # connecting-a-device.md, n8n-integration.md
 ├── Dockerfile
 └── docker-compose.yml
 ```
@@ -207,9 +222,11 @@ See [`.env.example`](.env.example). Key ones:
 | `GOOGLE_CLIENT_ID/SECRET` | Enables the Google login button |
 | `GITHUB_CLIENT_ID/SECRET` | Enables the GitHub login button |
 | `SMTP_*` | Sends OTP / reset emails (codes log to console if unset) |
-| `MQTT_BROKER_URL` | Broker the worker connects to |
+| `MQTT_BROKER_URL` | Broker the worker + downlink publisher connect to |
 | `NEXT_PUBLIC_MQTT_HOST` | `host:port` shown in device sample code |
 | `DEVICE_OFFLINE_SECONDS` | Mark a device offline after this idle period |
+| `N8N_BASE_URL` | Your n8n instance URL (enables the Automations page) |
+| `N8N_API_KEY` | n8n API key (Settings → API) for workflow status/listing |
 
 ---
 
@@ -243,6 +260,36 @@ mosquitto_pub -h localhost -p 1883 \
 
 See [docs/connecting-a-device.md](docs/connecting-a-device.md) for ESP32/Arduino/Pi examples.
 
+### Controlling a device (downlink)
+
+Write a virtual pin from a dashboard widget, the API, or an n8n flow:
+
+```bash
+curl -X POST https://your-host/api/devices/<id>/command \
+  -H "Authorization: Bearer iot_YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"pin":"relay","value":1}'
+```
+
+The value is persisted and published to MQTT `devices/<deviceId>/down`. MQTT
+devices subscribe and act on `{pin,value}` (Blynk `BLYNK_WRITE`-style); HTTP-only
+devices poll `GET /api/device/state` with their device token.
+
+---
+
+## Low-code automations with n8n
+
+IoTFlow uses **n8n** as its automation engine. On the **Automations** page, map a
+device event (`TELEMETRY`, `ALERT`, `DEVICE_ONLINE`, `DEVICE_OFFLINE`, `COMMAND`)
+to an n8n Webhook flow; the flow can call back into the API to control devices,
+notify (Email/Slack/Telegram/WhatsApp), log to Sheets/DB, or run AI — all no-code.
+Set `N8N_BASE_URL` + `N8N_API_KEY` to activate.
+
+**Full guide + 10 ready-made sample flows** (Blink LED, multi-LED, sonar alarm,
+temperature→fan, humidity→humidifier, soil→pump, motion→light, offline alert,
+data logger, daily summary) with step-by-step setup instructions:
+[docs/n8n-integration.md](docs/n8n-integration.md).
+
 ---
 
 ## API Overview
@@ -256,12 +303,17 @@ See [docs/connecting-a-device.md](docs/connecting-a-device.md) for ESP32/Arduino
 | `GET/PUT/DELETE` | `/api/devices/:id` | Read / update / delete a device |
 | `POST` | `/api/devices/:id/token` | Regenerate device token |
 | `GET` | `/api/devices/:id/telemetry` | Device telemetry + metric list |
-| `POST/GET` | `/api/telemetry` | Ingest telemetry / query recent |
+| `POST/GET` | `/api/telemetry` | Ingest telemetry (uplink) / query recent |
+| `GET/POST` | `/api/devices/:id/command` | Read pin states / set a virtual pin (downlink) |
+| `GET` | `/api/device/state` | Device-facing pin-state poll (device token) |
 | `GET/POST` | `/api/alerts` | Alerts + rules / create rule |
 | `PUT` | `/api/alerts/:id/resolve` | Resolve an alert |
 | `PATCH/DELETE` | `/api/alert-rules/:id` | Toggle / delete a rule |
 | `GET` | `/api/dashboard/summary` | Counts, latest telemetry, activity |
-| `GET/POST` | `/api/dashboard/widgets` | Dashboard widgets |
+| `GET/POST` | `/api/dashboard/widgets` | Dashboard widgets (display + control) |
+| `GET/POST` | `/api/automations` | List / create n8n automations |
+| `PATCH/DELETE/POST` | `/api/automations/:id` | Update / delete / test an automation |
+| `GET` | `/api/n8n/workflows` | n8n connection status + workflow list |
 | `GET/POST` | `/api/api-keys` | List / create API keys |
 
 ---
@@ -352,8 +404,8 @@ docker run -p 3000:3000 \
 
 ## Acknowledgements
 
-- Inspired by [OpenRemote](https://openremote.io), [ThingsBoard](https://thingsboard.io)
-  and [AWS IoT Application Kit](https://github.com/awslabs/iot-app-kit)
+- Inspired by [Blynk](https://blynk.io), [ThingsBoard](https://thingsboard.io)
+  and [OpenRemote](https://openremote.io); automation powered by [n8n](https://n8n.io)
 - Built with [Next.js](https://nextjs.org), [Prisma](https://www.prisma.io),
   [Auth.js](https://authjs.dev), [Recharts](https://recharts.org),
   [Leaflet](https://leafletjs.com) and [Eclipse Mosquitto](https://mosquitto.org)

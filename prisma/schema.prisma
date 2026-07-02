@@ -52,6 +52,12 @@ enum WidgetType {
   STATUS
   ALERTS
   MAP
+  // Control widgets — write to a device virtual pin (downlink, Blynk-style)
+  BUTTON
+  SLIDER
+  SWITCH
+  TERMINAL
+  LED
 }
 
 // ---------------------------------------------------------------------------
@@ -73,12 +79,13 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  accounts   Account[]
-  sessions   Session[]
-  devices    Device[]
-  dashboards Dashboard[]
-  apiKeys    ApiKey[]
-  projects   Project[]
+  accounts    Account[]
+  sessions    Session[]
+  devices     Device[]
+  dashboards  Dashboard[]
+  apiKeys     ApiKey[]
+  projects    Project[]
+  automations Automation[]
 }
 
 // Auth.js adapter models
@@ -150,16 +157,39 @@ model Device {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  owner      User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner      User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  project    Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tokens     DeviceToken[]
   telemetry  Telemetry[]
   alertRules AlertRule[]
   alerts     Alert[]
   widgets    Widget[]
+  commands   DeviceCommand[]
 
   @@index([ownerId])
   @@index([projectId])
+}
+
+// ---------------------------------------------------------------------------
+// Device commands — bidirectional control (Blynk-style virtual pins).
+// Holds the latest desired value for a device "pin" (e.g. "V1", "relay").
+// The server publishes changes to MQTT `devices/<id>/down`; HTTP-only devices
+// poll `GET /api/device/state`. One row per (device, pin).
+// ---------------------------------------------------------------------------
+model DeviceCommand {
+  id        String   @id @default(cuid())
+  deviceId  String
+  pin       String // virtual pin / control key, e.g. "V1", "relay", "led"
+  value     Float? // numeric value (slider, button 0/1, switch)
+  strValue  String? // optional string payload (terminal, text)
+  source    String   @default("dashboard") // "dashboard" | "api" | "automation"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([deviceId, pin])
+  @@index([deviceId])
 }
 
 model DeviceToken {
@@ -313,11 +343,50 @@ model Project {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  owner      User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  devices    Device[]
-  dashboards Dashboard[]
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  devices     Device[]
+  dashboards  Dashboard[]
+  automations Automation[]
 
   @@index([ownerId])
+}
+
+// ---------------------------------------------------------------------------
+// Automations — the low-code layer. Each automation forwards a platform event
+// (telemetry / alert / device online-offline) to an n8n workflow via its
+// webhook URL. n8n flows can call back into the platform API to control
+// devices, send notifications, log to sheets, call AI, etc. — all no-code.
+// ---------------------------------------------------------------------------
+enum AutomationEvent {
+  TELEMETRY
+  ALERT
+  DEVICE_ONLINE
+  DEVICE_OFFLINE
+  COMMAND
+}
+
+model Automation {
+  id            String          @id @default(cuid())
+  name          String
+  ownerId       String
+  projectId     String
+  event         AutomationEvent
+  deviceId      String? // optional filter: only this device
+  metric        String? // optional filter: only this metric (TELEMETRY)
+  n8nWebhookUrl String // n8n Webhook node "Production URL"
+  n8nWorkflowId String? // linked n8n workflow id (for status/deep-link)
+  enabled       Boolean         @default(true)
+  lastFiredAt   DateTime?
+  lastStatus    String? // "ok" | "error: ..." from the last delivery
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  owner   User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([projectId])
+  @@index([event])
 }
 
 // ---------------------------------------------------------------------------

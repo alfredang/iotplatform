@@ -62,12 +62,55 @@ export const alertRuleSchema = z
 
 export const widgetSchema = z.object({
   dashboardId: z.string().optional(),
-  type: z.enum(["NUMBER", "LINE", "BAR", "GAUGE", "STATUS", "ALERTS", "MAP"]),
+  type: z.enum([
+    "NUMBER",
+    "LINE",
+    "BAR",
+    "GAUGE",
+    "STATUS",
+    "ALERTS",
+    "MAP",
+    "BUTTON",
+    "SLIDER",
+    "SWITCH",
+    "TERMINAL",
+    "LED",
+  ]),
   title: z.string().trim().max(120).optional(),
   deviceId: z.string().optional().nullable(),
   metric: z.string().trim().max(60).optional().nullable(),
   config: z.record(z.string(), z.any()).optional(),
 });
+
+// Downlink control command (Blynk-style virtual pin write).
+export const commandSchema = z
+  .object({
+    pin: z
+      .string()
+      .trim()
+      .min(1, "Pin is required")
+      .max(40)
+      .regex(/^[a-zA-Z0-9_.-]+$/, "Use letters, numbers, dashes, dots or underscores"),
+    value: z.coerce.number().optional().nullable(),
+    strValue: z.string().max(2000).optional().nullable(),
+  })
+  .refine((d) => d.value !== undefined || d.strValue != null, {
+    message: "Provide a value or strValue",
+    path: ["value"],
+  });
+
+// Low-code automation linking a platform event to an n8n webhook.
+export const automationSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(120),
+  event: z.enum(["TELEMETRY", "ALERT", "DEVICE_ONLINE", "DEVICE_OFFLINE", "COMMAND"]),
+  deviceId: z.string().optional().nullable(),
+  metric: z.string().trim().max(60).optional().nullable(),
+  n8nWebhookUrl: z.string().trim().url("Enter a valid n8n webhook URL").max(500),
+  n8nWorkflowId: z.string().trim().max(80).optional().nullable(),
+  enabled: z.boolean().default(true),
+});
+
+export const automationUpdateSchema = automationSchema.partial();
 
 export const apiKeySchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),

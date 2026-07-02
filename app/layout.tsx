@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -14,9 +14,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IoTFlow — Lightweight IoT Platform",
+  title: "IoTFlow — Low-code IoT Platform",
   description:
-    "Connect devices, view real-time data, build dashboards and get alerts. Free, self-hosted, beginner-friendly IoT platform.",
+    "Connect Arduino, ESP32 & Raspberry Pi over MQTT/HTTP, control them in real time, and automate everything with n8n. Free & self-hosted.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "IoTFlow",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0f17",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

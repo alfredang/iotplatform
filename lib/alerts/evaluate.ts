@@ -2,6 +2,7 @@ import type { AlertOperator } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { metricUnit } from "@/lib/utils";
 import { getMailConfig, sendEmail } from "@/lib/email";
+import { dispatchEvent } from "@/lib/automations/dispatch";
 
 /**
  * Email a triggered alert to the configured recipient when email alerts are
@@ -86,7 +87,10 @@ export async function evaluateMetric(
     await prisma.alert.create({
       data: { ruleId: rule.id, deviceId, value, message },
     });
-    if (device) await notifyAlert(device, message);
+    if (device) {
+      await notifyAlert(device, message);
+      void dispatchEvent("ALERT", device, { metric, value, message, ruleName: rule.name });
+    }
     raised++;
   }
   return raised;
@@ -116,6 +120,7 @@ export async function evaluateOffline(offlineSeconds = 120): Promise<{
       where: { id: device.id },
       data: { status: "OFFLINE" },
     });
+    void dispatchEvent("DEVICE_OFFLINE", device, {});
 
     const rules = await prisma.alertRule.findMany({
       where: { deviceId: device.id, operator: "OFFLINE", enabled: true },
@@ -136,6 +141,7 @@ export async function evaluateOffline(offlineSeconds = 120): Promise<{
         data: { ruleId: rule.id, deviceId: device.id, message },
       });
       await notifyAlert(device, message);
+      void dispatchEvent("ALERT", device, { message, ruleName: rule.name });
       raised++;
     }
   }
