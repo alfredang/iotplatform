@@ -12,6 +12,7 @@ import {
   Mail,
   Inbox,
   Workflow,
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
 
@@ -22,6 +23,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/devices", label: "Devices", icon: Cpu },
   { href: "/devices/new", label: "Add Device", icon: PlusCircle },
+  { href: "/integrate", label: "Integrate", icon: BookOpen },
   { href: "/telemetry", label: "Telemetry", icon: Activity },
   { href: "/alerts", label: "Alerts", icon: Bell },
   { href: "/automations", label: "Automations", icon: Workflow },
