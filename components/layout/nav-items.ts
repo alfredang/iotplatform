@@ -13,12 +13,14 @@ import {
   Inbox,
   Workflow,
   BookOpen,
+  GraduationCap,
   type LucideIcon,
 } from "lucide-react";
 
 export type NavItem = { href: string; label: string; icon: LucideIcon };
 
 export const NAV_ITEMS: NavItem[] = [
+  { href: "/getting-started", label: "Tutorial", icon: GraduationCap },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/devices", label: "Devices", icon: Cpu },

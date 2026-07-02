@@ -76,6 +76,64 @@ const STEPS = [
   { icon: Workflow, title: "3 · Automate with n8n", desc: "Device events fire n8n flows that notify, control devices back, log data or call AI." },
 ];
 
+const TUTORIALS = [
+  {
+    icon: Cpu,
+    title: "Add your first device",
+    time: "2 min",
+    steps: [
+      "Sign up and pick a project.",
+      "Open Add Device and name it.",
+      "Choose HTTP or MQTT and create it.",
+      "Copy the device token (shown once).",
+    ],
+  },
+  {
+    icon: Radio,
+    title: "Send your first reading",
+    time: "5 min",
+    steps: [
+      "Copy a quickstart snippet (cURL, Python or ESP32).",
+      "Paste your token + device id.",
+      "Run it on your board or Pi.",
+      "See it live on the dashboard.",
+    ],
+  },
+  {
+    icon: Gauge,
+    title: "Build a dashboard",
+    time: "3 min",
+    steps: [
+      "Click Add widget on the dashboard.",
+      "Pick Number, Gauge, Line, LED or Map.",
+      "Bind it to a device + metric.",
+      "Add more — it auto-refreshes.",
+    ],
+  },
+  {
+    icon: SlidersHorizontal,
+    title: "Control a device",
+    time: "5 min",
+    steps: [
+      "Add a Switch, Button or Slider widget.",
+      "Choose a virtual pin (e.g. V1, relay).",
+      "Have the device read devices/<id>/down.",
+      "Toggle it — the command arrives instantly.",
+    ],
+  },
+  {
+    icon: Workflow,
+    title: "Automate with n8n",
+    time: "8 min",
+    steps: [
+      "Add a Webhook node in n8n; copy its URL.",
+      "Create an Automation for an event.",
+      "Paste the webhook URL and save.",
+      "Test it, then let devices trigger it.",
+    ],
+  },
+];
+
 function NavBar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
@@ -84,6 +142,7 @@ function NavBar() {
         <nav className="hidden items-center gap-7 text-sm text-muted md:flex">
           <a href="#features" className="hover:text-foreground">Features</a>
           <a href="#how" className="hover:text-foreground">How it works</a>
+          <a href="#tutorials" className="hover:text-foreground">Tutorial</a>
           <a href="#industries" className="hover:text-foreground">Industries</a>
           <a href="#preview" className="hover:text-foreground">Dashboard</a>
           <a href="#contact" className="hover:text-foreground">Contact</a>
@@ -231,6 +290,53 @@ export default function LandingPage() {
               <ArrowRight className="h-4 w-4 text-primary" />
               <span className="rounded-lg bg-primary/10 px-3 py-1.5 font-medium text-primary">n8n flows → any action</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tutorials */}
+      <section id="tutorials" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Get started in 5 short tutorials
+          </h2>
+          <p className="mt-3 text-muted">
+            From zero to a live, automated IoT dashboard — no heavy code required.
+          </p>
+        </div>
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {TUTORIALS.map((t, i) => (
+            <div
+              key={t.title}
+              className="rounded-card border border-border bg-surface p-6 transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <t.icon className="h-5 w-5" />
+                </span>
+                <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-muted">~{t.time}</span>
+              </div>
+              <h3 className="mt-4 font-semibold">
+                <span className="text-primary">{i + 1}.</span> {t.title}
+              </h3>
+              <ol className="mt-3 space-y-1.5">
+                {t.steps.map((s, j) => (
+                  <li key={j} className="flex gap-2 text-sm text-muted">
+                    <span className="text-primary/70">{j + 1}</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+          <div className="flex flex-col items-start justify-center rounded-card border border-dashed border-border bg-surface/50 p-6">
+            <h3 className="font-semibold">Ready to try?</h3>
+            <p className="mt-1 text-sm text-muted">Create a free account and follow along.</p>
+            <Link href="/register" className="mt-4">
+              <Button>
+                Get started free <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
