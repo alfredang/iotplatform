@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
+    },
+    "lead-magnets": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/lead-magnets/SKILL.md",
+      "computedHash": "268c83c38cc49d3e437042f5d4e3c31b822deb6012b9d5d7a1370ae500058018"
+    },
+    "mqtt-development": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "mqtt-development/SKILL.md",
+      "computedHash": "59a0b16fbba484cf2939eaaeac25af0f77673b2a0aeecac347b7e41f51b839cd"
+    },
+    "n8n-mcp-tools-expert": {
+      "source": "czlonkowski/n8n-skills",
+      "sourceType": "github",
+      "skillPath": "skills/n8n-mcp-tools-expert/SKILL.md",
+      "computedHash": "68ef07515849ba91da343506009d15bd508dc3af54916a9bbd4af57c07ec2fca"
+    },
+    "n8n-workflow-patterns": {
+      "source": "czlonkowski/n8n-skills",
+      "sourceType": "github",
+      "skillPath": "skills/n8n-workflow-patterns/SKILL.md",
+      "computedHash": "9ccf6e22a8a34cb732f8f2a40f6cb83e0b94d92a29f5a5422010c7a3aceadf77"
+    },
+    "seo-audit": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/seo-audit/SKILL.md",
+      "computedHash": "f2dc52130189068981f21e1c0bdc4471ac7cd9b08d8a1320604411aa0f950385"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "c0e71f1ea9d80c74f710960c2b4d9ab0f8a6d14c331f8d361df2c28d1879846e"
+    }
+  }
+}

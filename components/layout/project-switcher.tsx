@@ -2,14 +2,25 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
 import { Check, ChevronsUpDown, FolderKanban, Plus } from "lucide-react";
-import { useProject } from "@/components/project/project-context";
+import { useProject, type ProjectSummary } from "@/components/project/project-context";
+import { fetcher } from "@/lib/client";
 import { cn } from "@/lib/utils";
 
 export function ProjectSwitcher({ onNavigate }: { onNavigate?: () => void }) {
-  const { projects, projectId, setProject } = useProject();
+  const { projects: initialProjects, projectId, setProject } = useProject();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  // Keep the list live: refetch the user's projects so newly-created projects
+  // appear without a full reload. Falls back to the server-rendered list.
+  const { data } = useSWR<{ projects: ProjectSummary[] }>("/api/projects", fetcher, {
+    fallbackData: { projects: initialProjects },
+    revalidateOnFocus: true,
+    refreshInterval: 15000,
+  });
+  const projects = data?.projects ?? initialProjects;
   const current = projects.find((p) => p.id === projectId) ?? projects[0];
 
   return (

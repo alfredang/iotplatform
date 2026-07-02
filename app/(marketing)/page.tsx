@@ -32,6 +32,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { DashboardPreview } from "@/components/marketing/dashboard-preview";
 import { EnquiryForm } from "@/components/marketing/enquiry-form";
+import { WhatsAppButton } from "@/components/marketing/whatsapp-button";
 
 export const metadata = {
   title: "IoTFlow — Low-code IoT platform powered by n8n",
@@ -330,7 +331,7 @@ export default function LandingPage() {
       </section>
 
       {/* Enquiry */}
-      <section id="contact" className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-24">
+      <section id="contact" className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:py-24">
         <div className="mx-auto mb-8 max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Get in touch</h2>
           <p className="mt-3 text-muted">
@@ -342,31 +343,69 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border bg-surface/50">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6">
-          <Logo href="/" size="sm" />
-          <p className="text-sm text-muted">
-            © {new Date().getFullYear()} IoTFlow · Self-hosted IoT platform
-          </p>
-          <div className="flex gap-4 text-sm text-muted">
-            <Link href="/login" className="hover:text-foreground">Log in</Link>
-            <Link href="/register" className="hover:text-foreground">Sign up</Link>
-            <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <Logo href="/" size="sm" />
+            <p className="mt-4 max-w-xs text-sm text-muted">
+              A low-code, self-hosted IoT platform powered by n8n — connect,
+              control and automate devices over MQTT &amp; HTTP.
+            </p>
+          </div>
+
+          {/* About */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">About</h3>
+            <ul className="mt-4 space-y-2 text-sm text-muted">
+              <li><a href="#features" className="hover:text-foreground">Features</a></li>
+              <li><a href="#how" className="hover:text-foreground">How it works</a></li>
+              <li><a href="#industries" className="hover:text-foreground">Industries</a></li>
+              <li>
+                <a href="https://www.tertiaryinfotech.com/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+                  Tertiary Infotech
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Links */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Links</h3>
+            <ul className="mt-4 space-y-2 text-sm text-muted">
+              <li><Link href="/login" className="hover:text-foreground">Log in</Link></li>
+              <li><Link href="/register" className="hover:text-foreground">Sign up</Link></li>
+              <li><a href="#preview" className="hover:text-foreground">Dashboard</a></li>
+              <li><Link href="/privacy" className="hover:text-foreground">Privacy</Link></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Contact</h3>
+            <ul className="mt-4 space-y-2 text-sm text-muted">
+              <li>
+                <a href="mailto:enquiry@tertiaryinfotech.com" className="hover:text-foreground">
+                  enquiry@tertiaryinfotech.com
+                </a>
+              </li>
+              <li>
+                <a href="https://wa.me/6588666375" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+                  WhatsApp: +65 8866 6375
+                </a>
+              </li>
+              <li><a href="#contact" className="hover:text-foreground">Send an enquiry</a></li>
+            </ul>
           </div>
         </div>
+
         <div className="border-t border-border">
-          <p className="mx-auto max-w-6xl px-4 py-4 text-center text-xs text-muted sm:px-6">
-            Powered by{" "}
-            <a
-              href="https://www.tertiarycourses.com.sg/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-primary hover:underline"
-            >
-              Tertiary Infotech Academy Pte Ltd
-            </a>
+          <p className="mx-auto max-w-6xl px-4 py-5 text-center text-xs text-muted sm:px-6">
+            © {new Date().getFullYear()} Tertiary Infotech Academy Pte Ltd. All rights reserved. · UEN 201200696W
           </p>
         </div>
       </footer>
+
+      <WhatsAppButton />
     </>
   );
 }

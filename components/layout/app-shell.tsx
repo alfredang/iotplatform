@@ -153,8 +153,24 @@ export function AppShell({
           <div className="lg:hidden">
             <Logo href="/dashboard" size="sm" />
           </div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-3">
             <ThemeToggle />
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-2.5 py-1.5">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+                {(user.name || user.email || "?").trim().charAt(0).toUpperCase()}
+              </span>
+              <span className="hidden max-w-[160px] truncate text-sm font-medium sm:block">
+                {user.name || user.email}
+              </span>
+              <button
+                type="button"
+                aria-label="Sign out"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="text-muted transition hover:text-danger"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </header>
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>

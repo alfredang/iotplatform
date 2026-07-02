@@ -78,8 +78,9 @@ log or call AI.
   dashboard, automations, alerts and map; switch projects from the sidebar.
 - **Authentication** — email/password, OTP email codes, Google & GitHub OAuth
   (OAuth/SMTP activate automatically when configured); Admin & User roles.
-- **Admin area** — manage users/roles, deactivate accounts, API keys and SMTP +
-  email-on-alert from the UI. **View as** lets admins preview as a regular user.
+- **Admin area** — manage users/roles, deactivate accounts, API keys, SMTP +
+  email-on-alert, and **review landing-page enquiries** (also emailed to the
+  team). **View as** lets admins preview as a regular user.
 - **Maps** — OpenStreetMap view of GPS-enabled devices.
 - **API keys** — account-level keys for HTTP telemetry submission and n8n callbacks.
 - **Industry-focused landing page** — agriculture, industrial, smart home, energy,

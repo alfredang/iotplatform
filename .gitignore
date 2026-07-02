@@ -46,3 +46,9 @@ next-env.d.ts
 
 # playwright mcp artifacts
 .playwright-mcp
+
+# installed third-party Claude skills — vendored content is reproducible from
+# skills-lock.json (npx skills add), so we don't commit the 2MB+ of packages.
+/.agents/
+/.claude/skills/*
+!/.claude/skills/.gitkeep

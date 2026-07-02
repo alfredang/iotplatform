@@ -178,6 +178,73 @@ node(s). For schedule flows: edit the HTTP URL (host + device id) + API key only
 ¹ Add an Email / Slack / Telegram / WhatsApp node after *Build alert message*.
 ² Add a Google Sheets / Postgres / Airtable node after *Map reading*.
 
+## Sample flow guides (01–10)
+
+Each guide is self-contained. **Control flows** (01–07) only need your account
+API key pasted into the HTTP node(s) — the callback URL is built from the event
+(webhook flows) or edited once (schedule flows). Create the matching **Automation**
+in IoTFlow (Automations → New automation) where indicated.
+
+### 01 · Blink LED (Arduino) — schedule
+- **Does:** flips virtual pin `V1` between 1 and 0 every 2s.
+- **n8n:** open *IoTFlow 01* → **Set LED (V1)** HTTP node → set the URL host + `YOUR_DEVICE_ID` (internal id from `/devices/<id>`) and the `Authorization: Bearer iot_…` header → **Save** → **Activate**.
+- **IoTFlow automation:** none (schedule flows push on their own).
+- **Device:** subscribe to `devices/<id>/down`; on `{pin:"V1"}` set the LED to `value>0`.
+- **Test:** watch the LED blink, or `GET /api/device/state` and see `V1` alternate.
+
+### 02 · Multiple LEDs chase (Arduino) — schedule
+- **Does:** every 1s lights one of three LEDs in turn (writes `V1`,`V2`,`V3`).
+- **n8n:** open *IoTFlow 02* → **Set each LED** HTTP node → set URL host + device id + API key → **Activate**.
+- **IoTFlow automation:** none.
+- **Device:** drive 3 GPIOs from pins `V1`,`V2`,`V3` on `devices/<id>/down`.
+
+### 03 · Sonar distance alarm (Arduino HC-SR04) — TELEMETRY `distance`
+- **Does:** distance `< 20cm` → `buzzer=1`, else `buzzer=0`.
+- **n8n:** open *IoTFlow 03* → set the API key header in **Sound buzzer** and **Silence buzzer** → **Activate** → copy the **Platform event** webhook Production URL.
+- **IoTFlow automation:** event **Telemetry received**, metric `distance`, device = your board → paste the webhook URL.
+- **Device:** publish `{"distance": <cm>}`; act on pin `buzzer`.
+- **Test:** send `{"deviceId":"…","distance":10}` (see Part E) → buzzer command appears.
+
+### 04 · Temperature → fan control (ESP32) — TELEMETRY `temperature`
+- **Does:** temp `> 30°C` → `relay=1` (fan on), else `relay=0`.
+- **n8n:** open *IoTFlow 04* → set API key in **Fan ON** / **Fan OFF** → adjust the IF threshold if needed → **Activate** → copy webhook URL.
+- **IoTFlow automation:** **Telemetry received**, metric `temperature` → webhook URL.
+- **Device:** publish `{"temperature": …}`; act on pin `relay`.
+
+### 05 · Humidity → humidifier (ESP32/DHT22) — TELEMETRY `humidity`
+- **Does:** humidity `< 40%` → `humidifier=1`, else `0`.
+- **n8n:** open *IoTFlow 05* → set API key in both HTTP nodes → **Activate** → copy webhook URL.
+- **IoTFlow automation:** **Telemetry received**, metric `humidity` → webhook URL.
+- **Device:** publish `{"humidity": …}`; act on pin `humidifier`.
+
+### 06 · Soil moisture → irrigation pump (Raspberry Pi) — TELEMETRY `soil`
+- **Does:** raw soil reading `< 300` (dry) → `pump=1`, else `0`.
+- **n8n:** open *IoTFlow 06* → set API key in **Pump ON** / **Pump OFF** → **Activate** → copy webhook URL.
+- **IoTFlow automation:** **Telemetry received**, metric `soil` → webhook URL.
+- **Device (Pi):** publish `{"soil": <adc>}`; drive the pump relay from pin `pump`.
+
+### 07 · PIR motion → light (Raspberry Pi) — TELEMETRY `motion`
+- **Does:** `motion ≥ 1` → light `V1=1`.
+- **n8n:** open *IoTFlow 07* → set API key in **Light ON** → **Activate** → copy webhook URL. (Add an off-timer branch if you want auto-off.)
+- **IoTFlow automation:** **Telemetry received**, metric `motion` → webhook URL.
+- **Device (Pi):** publish `{"motion":1}` on the PIR edge; act on pin `V1`.
+
+### 08 · Device offline alert — DEVICE_OFFLINE
+- **Does:** builds an alert message when a device drops off; **add your channel** node (Email / Slack / Telegram / WhatsApp) after **Build alert message**.
+- **n8n:** open *IoTFlow 08* → append + configure a notification node → **Activate** → copy webhook URL.
+- **IoTFlow automation:** event **Device went offline** (device = *Any* or a specific one) → webhook URL.
+- **Test:** stop sending telemetry past `DEVICE_OFFLINE_SECONDS`, or use the automation **Test** button.
+
+### 09 · Data logger (Raspberry Pi → Sheets) — TELEMETRY
+- **Does:** flattens each reading to `device, metric, value, ts`; **add a sink** (Google Sheets / Postgres / Airtable) after **Map reading**.
+- **n8n:** open *IoTFlow 09* → add + connect your storage node → **Activate** → copy webhook URL.
+- **IoTFlow automation:** **Telemetry received**, metric *blank* (all) → webhook URL.
+
+### 10 · Scheduled daily summary — schedule (cron 08:00)
+- **Does:** fetches recent telemetry and computes per-metric count/avg/min/max.
+- **n8n:** open *IoTFlow 10* → **Fetch last 200 readings** HTTP node → set URL host + API key → optionally append an Email/Slack node after **Summarise** → **Activate**.
+- **IoTFlow automation:** none (runs on its own schedule).
+
 ## Part E — Testing without hardware
 
 - **Fire an event by hand** (triggers your webhook automations):
