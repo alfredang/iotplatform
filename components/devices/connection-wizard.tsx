@@ -233,7 +233,10 @@ export function ConnectionWizard() {
                   <TelemetryChart deviceId={device.id} metric={firstMetric} type="LINE" height={200} />
                 </div>
               )}
-              <div className="flex justify-center gap-2">
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button variant="ghost" onClick={() => router.push("/integrate")}>
+                  Integration guide
+                </Button>
                 <Button variant="outline" onClick={() => router.push(`/devices/${device.id}`)}>
                   View device
                 </Button>

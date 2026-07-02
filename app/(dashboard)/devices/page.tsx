@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import Link from "next/link";
-import { Cpu, PlusCircle, Trash2, ChevronRight } from "lucide-react";
+import { Cpu, PlusCircle, Trash2, ChevronRight, BookOpen } from "lucide-react";
 import { apiFetch, fetcher } from "@/lib/client";
 import { useProject, withProject } from "@/components/project/project-context";
 import { Button } from "@/components/ui/button";
@@ -61,11 +61,18 @@ export default function DevicesPage() {
         <EmptyState
           icon={<Cpu className="h-8 w-8" />}
           title="No devices yet"
-          description="Add your first device with the guided wizard."
+          description="Add your first device with the guided wizard, or see how to connect Arduino, ESP32 & Raspberry Pi."
           action={
-            <Link href="/devices/new">
-              <Button>Add device</Button>
-            </Link>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Link href="/devices/new">
+                <Button>Add device</Button>
+              </Link>
+              <Link href="/integrate">
+                <Button variant="outline">
+                  <BookOpen className="h-4 w-4" /> View integration guide
+                </Button>
+              </Link>
+            </div>
           }
         />
       ) : (
