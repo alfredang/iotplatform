@@ -38,6 +38,7 @@ import { EnquiryForm } from "@/components/marketing/enquiry-form";
 import { WhatsAppButton } from "@/components/marketing/whatsapp-button";
 import { AppStoreBadge } from "@/components/marketing/app-store-badge";
 import { GithubIcon, LinkedinIcon } from "@/components/marketing/brand-icons";
+import { SiteHeader } from "@/components/marketing/site-header";
 import { prisma } from "@/lib/db/prisma";
 import { postCardSelect } from "@/lib/blog";
 
@@ -148,33 +149,6 @@ const TUTORIALS = [
   },
 ];
 
-function NavBar() {
-  return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Logo href="/" />
-        <nav className="hidden items-center gap-7 text-sm text-muted md:flex">
-          <a href="#features" className="hover:text-foreground">Features</a>
-          <a href="#how" className="hover:text-foreground">How it works</a>
-          <a href="#tutorials" className="hover:text-foreground">Tutorial</a>
-          <Link href="/blog" className="hover:text-foreground">Blog</Link>
-          <a href="#industries" className="hover:text-foreground">Industries</a>
-          <a href="#contact" className="hover:text-foreground">Contact</a>
-        </nav>
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Link href="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm">Log in</Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm">Sign up</Button>
-          </Link>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 export default async function LandingPage() {
   const latestPosts = await prisma.blogPost
     .findMany({
@@ -187,7 +161,7 @@ export default async function LandingPage() {
 
   return (
     <>
-      <NavBar />
+      <SiteHeader />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
