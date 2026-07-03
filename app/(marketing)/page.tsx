@@ -78,6 +78,7 @@ const STEPS = [
 
 const TUTORIALS = [
   {
+    slug: "add-your-first-device",
     icon: Cpu,
     title: "Add your first device",
     time: "2 min",
@@ -89,6 +90,7 @@ const TUTORIALS = [
     ],
   },
   {
+    slug: "send-your-first-reading",
     icon: Radio,
     title: "Send your first reading",
     time: "5 min",
@@ -100,6 +102,7 @@ const TUTORIALS = [
     ],
   },
   {
+    slug: "build-a-dashboard",
     icon: Gauge,
     title: "Build a dashboard",
     time: "3 min",
@@ -111,6 +114,7 @@ const TUTORIALS = [
     ],
   },
   {
+    slug: "control-a-device",
     icon: SlidersHorizontal,
     title: "Control a device",
     time: "5 min",
@@ -122,6 +126,7 @@ const TUTORIALS = [
     ],
   },
   {
+    slug: "automate-with-n8n",
     icon: Workflow,
     title: "Automate with n8n",
     time: "8 min",
@@ -306,9 +311,10 @@ export default function LandingPage() {
         </div>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {TUTORIALS.map((t, i) => (
-            <div
-              key={t.title}
-              className="rounded-card border border-border bg-surface p-6 transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
+            <Link
+              key={t.slug}
+              href={`/tutorials/${t.slug}`}
+              className="group flex flex-col rounded-card border border-border bg-surface p-6 transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
             >
               <div className="flex items-center justify-between">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -327,16 +333,18 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ol>
-            </div>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                Read the full guide <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </span>
+            </Link>
           ))}
           <div className="flex flex-col items-start justify-center rounded-card border border-dashed border-border bg-surface/50 p-6">
             <h3 className="font-semibold">Ready to try?</h3>
-            <p className="mt-1 text-sm text-muted">Create a free account and follow along.</p>
-            <Link href="/register" className="mt-4">
-              <Button>
-                Get started free <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+            <p className="mt-1 text-sm text-muted">Browse all tutorials or create a free account and follow along.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/tutorials"><Button variant="outline">All tutorials</Button></Link>
+              <Link href="/register"><Button>Get started free <ArrowRight className="h-4 w-4" /></Button></Link>
+            </div>
           </div>
         </div>
       </section>
