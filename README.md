@@ -65,9 +65,12 @@ log or call AI.
   Terminal & LED widgets write to a virtual pin; the server persists the value
   and publishes it to MQTT `devices/<id>/down`. HTTP-only devices poll
   `GET /api/device/state`.
-- **Connect any device** — guided wizard with copy-paste **uplink + control**
-  code for ESP32, Arduino, Raspberry Pi, generic **C++** (Paho), **Python**
-  (paho/requests), MQTT clients and cURL.
+- **Connect any device** — guided wizard + an in-app **Integrate guide** with
+  copy-paste **uplink + control** code for ESP32, Arduino, Raspberry Pi, generic
+  **C++** (Paho), **Python** (paho/requests), MQTT clients and cURL.
+- **Device SDKs** — optional thin clients in [`clients/`](clients/): an Arduino/ESP
+  library (`virtualWrite()` + a `BLYNK_WRITE`-style callback) and a single-file,
+  zero-install Python client (`clients/python/iotflow.py`).
 - **Telemetry** — JSON ingestion over **HTTP** and **MQTT**, normalized into metrics.
 - **Real-time dashboard** — auto-refreshing summary cards + customizable widgets
   (number, line, bar, gauge, LED, device status, alert list, map + control widgets).
@@ -78,9 +81,16 @@ log or call AI.
   dashboard, automations, alerts and map; switch projects from the sidebar.
 - **Authentication** — email/password, OTP email codes, Google & GitHub OAuth
   (OAuth/SMTP activate automatically when configured); Admin & User roles.
-- **Admin area** — manage users/roles, deactivate accounts, API keys, SMTP +
-  email-on-alert, and **review landing-page enquiries** (also emailed to the
-  team). **View as** lets admins preview as a regular user.
+- **Blog / CMS** — admin-authored posts with categories, tags, social likes and
+  star reviews; public `/blog` with category/tag filters. Ships 5 IoT + n8n
+  project articles (each with an n8n workflow diagram).
+- **Step-by-step tutorials** — public `/tutorials` guides (with screenshots)
+  covering the whole loop: connect → visualise → control → automate.
+- **Admin area** — manage users/roles, deactivate accounts, API keys, blog and
+  enquiries; a **Settings** page stores SMTP, **n8n** and **MQTT** config in the
+  database (env vars are the fallback). **View as** lets admins preview as a user;
+  regular users can create projects & dashboards while device/automation/alert
+  management is admin-only.
 - **Maps** — OpenStreetMap view of GPS-enabled devices.
 - **API keys** — account-level keys for HTTP telemetry submission and n8n callbacks.
 - **Industry-focused landing page** — agriculture, industrial, smart home, energy,
@@ -138,18 +148,22 @@ log or call AI.
 ```
 iotplatform/
 ├── app/
-│   ├── (marketing)/        # industry-focused landing page
+│   ├── (marketing)/        # landing page, blog, tutorials, integrate, privacy
 │   ├── (auth)/             # login, register, forgot-password, verify-otp
-│   ├── (dashboard)/        # dashboard, devices, telemetry, alerts, automations, maps, api-keys, settings
-│   ├── api/                # route handlers (devices, telemetry, commands, automations, n8n, ...)
+│   ├── (dashboard)/        # dashboard, devices, telemetry, alerts, automations, maps,
+│   │                       # api-keys, integrate, getting-started, admin (users/blog/enquiries/settings)
+│   ├── api/                # route handlers (devices, telemetry, commands, automations,
+│   │                       # n8n, blog, admin/config, ...)
 │   └── manifest.ts         # PWA web app manifest
-├── components/             # layout, dashboard (+ control widgets), devices, automations, charts, maps, auth, ui
-├── lib/                    # auth, db, mqtt (topics + publish), telemetry, alerts,
-│                           # commands, automations (dispatch), n8n, validation, tokens
-├── prisma/                 # schema.prisma, seed.ts, migrations
+├── components/             # layout, dashboard (+ control widgets), devices, automations,
+│                           # blog, admin, marketing, charts, maps, auth, ui
+├── lib/                    # auth, db, app-config, mqtt (topics + publish), telemetry, alerts,
+│                           # commands, automations (dispatch), n8n, blog, markdown, validation, tokens
+├── clients/                # device SDKs — arduino/IoTFlow (library), python/iotflow.py
+├── prisma/                 # schema.prisma, seed.ts, demo-projects.ts, blog-seed.ts, migrations
 ├── worker/                 # mqtt-ingest.ts (long-running ingestion worker)
 ├── mosquitto/              # mosquitto.conf
-├── docs/                   # connecting-a-device.md, n8n-integration.md
+├── docs/                   # connecting-a-device.md, n8n-integration.md, mobile-apps-parity-plan.md
 ├── Dockerfile
 └── docker-compose.yml
 ```
