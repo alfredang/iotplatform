@@ -26,6 +26,9 @@ import {
   Truck,
   Droplets,
   Store,
+  Phone,
+  Mail,
+  MessageCircle,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -33,6 +36,8 @@ import { Button } from "@/components/ui/button";
 import { DashboardPreview } from "@/components/marketing/dashboard-preview";
 import { EnquiryForm } from "@/components/marketing/enquiry-form";
 import { WhatsAppButton } from "@/components/marketing/whatsapp-button";
+import { AppStoreBadge } from "@/components/marketing/app-store-badge";
+import { GithubIcon, LinkedinIcon } from "@/components/marketing/brand-icons";
 
 export const metadata = {
   title: "IoTFlow — Low-code IoT platform powered by n8n",
@@ -465,6 +470,8 @@ export default function LandingPage() {
               A low-code, self-hosted IoT platform powered by n8n — connect,
               control and automate devices over MQTT &amp; HTTP.
             </p>
+            <p className="mt-5 text-xs font-medium text-muted">Get the mobile app</p>
+            <AppStoreBadge className="mt-2" />
           </div>
 
           {/* About */}
@@ -480,6 +487,24 @@ export default function LandingPage() {
                 </a>
               </li>
             </ul>
+            <div className="mt-5 flex items-center gap-3">
+              <a
+                href="https://github.com/alfredang"
+                target="_blank" rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-muted transition hover:text-foreground"
+              >
+                <GithubIcon className="h-4.5 w-4.5" />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/angchewhoe/"
+                target="_blank" rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-muted transition hover:text-[#0a66c2]"
+              >
+                <LinkedinIcon className="h-4.5 w-4.5" />
+              </a>
+            </div>
           </div>
 
           {/* Links */}
@@ -488,7 +513,7 @@ export default function LandingPage() {
             <ul className="mt-4 space-y-2 text-sm text-muted">
               <li><Link href="/login" className="hover:text-foreground">Log in</Link></li>
               <li><Link href="/register" className="hover:text-foreground">Sign up</Link></li>
-              <li><a href="#preview" className="hover:text-foreground">Dashboard</a></li>
+              <li><Link href="/tutorials" className="hover:text-foreground">Tutorials</Link></li>
               <li><Link href="/privacy" className="hover:text-foreground">Privacy</Link></li>
             </ul>
           </div>
@@ -496,18 +521,25 @@ export default function LandingPage() {
           {/* Contact */}
           <div>
             <h3 className="text-sm font-semibold text-foreground">Contact</h3>
-            <ul className="mt-4 space-y-2 text-sm text-muted">
-              <li>
-                <a href="mailto:enquiry@tertiaryinfotech.com" className="hover:text-foreground">
-                  enquiry@tertiaryinfotech.com
-                </a>
+            <ul className="mt-4 space-y-3 text-sm text-muted">
+              <li className="flex items-start gap-2.5">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>12 Woodlands Square #07-85/86/87<br />Woods Square Tower 1, Singapore 737715</span>
               </li>
-              <li>
+              <li className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                <a href="tel:+6561000613" className="hover:text-foreground">+65 6100 0613</a>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Mail className="h-4 w-4 shrink-0 text-primary" />
+                <a href="mailto:enquiry@tertiaryinfotech.com" className="hover:text-foreground">enquiry@tertiaryinfotech.com</a>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
                 <a href="https://wa.me/6588666375" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
-                  WhatsApp: +65 8866 6375
+                  WhatsApp +65 8866 6375
                 </a>
               </li>
-              <li><a href="#contact" className="hover:text-foreground">Send an enquiry</a></li>
             </ul>
           </div>
         </div>
