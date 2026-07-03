@@ -13,7 +13,7 @@
 
 **A low-code, self-hosted IoT platform powered by n8n — connect Arduino/ESP32/Raspberry Pi over MQTT & HTTP, control them in real time from web & mobile, and automate everything with drag-and-drop n8n flows.**
 
-[Report Bug](https://github.com/alfredang/iotplatform/issues) · [Request Feature](https://github.com/alfredang/iotplatform/issues)
+[Live Demo](https://iot.tertiaryinfotech.com) · [Report Bug](https://github.com/alfredang/iotplatform/issues) · [Request Feature](https://github.com/alfredang/iotplatform/issues)
 
 </div>
 
