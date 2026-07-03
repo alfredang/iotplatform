@@ -213,8 +213,11 @@ ${common(flow, [
 ];
 
 async function main() {
-  const admin = await prisma.user.findUnique({ where: { email: "admin@demo.io" } });
-  if (!admin) throw new Error("admin@demo.io not found — run npm run db:seed first");
+  // Author the posts as the first admin (falls back to the demo admin).
+  const admin =
+    (await prisma.user.findUnique({ where: { email: "admin@demo.io" } })) ??
+    (await prisma.user.findFirst({ where: { role: "ADMIN" }, orderBy: { createdAt: "asc" } }));
+  if (!admin) throw new Error("No admin user found — create an admin first.");
 
   // Clean slate for blog data
   await prisma.blogReview.deleteMany();
