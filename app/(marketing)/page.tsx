@@ -254,6 +254,61 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* The perfect IoT stack — 3 pillars */}
+      <section id="stack" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">The perfect IoT stack</h2>
+          <p className="mt-3 text-muted">
+            Three parts, each doing what it does best — together, a complete low-code IoT solution.
+          </p>
+        </div>
+
+        <div className="mt-12 grid items-stretch gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr]">
+          {/* Pillar 1 */}
+          <div className="rounded-card border border-border bg-surface p-6 text-center">
+            <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Cpu className="h-6 w-6" />
+            </span>
+            <h3 className="mt-4 font-semibold">IoT Platform</h3>
+            <p className="mt-1 text-sm font-medium text-primary">Connection &amp; Sensing</p>
+            <p className="mt-2 text-sm text-muted">Connect Arduino/ESP/Pi over MQTT &amp; HTTP; capture and store telemetry reliably.</p>
+          </div>
+
+          <div className="flex items-center justify-center lg:px-1">
+            <ArrowRight className="h-6 w-6 rotate-90 text-muted lg:rotate-0" />
+          </div>
+
+          {/* Pillar 2 */}
+          <div className="rounded-card border border-primary/40 bg-primary/5 p-6 text-center shadow-lg shadow-primary/5">
+            <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <Workflow className="h-6 w-6" />
+            </span>
+            <h3 className="mt-4 font-semibold">n8n</h3>
+            <p className="mt-1 text-sm font-medium text-primary">Actions &amp; Alerts</p>
+            <p className="mt-2 text-sm text-muted">Triggers → actions: notify, escalate, log, call AI and control devices back — no code.</p>
+          </div>
+
+          <div className="flex items-center justify-center lg:px-1">
+            <ArrowRight className="h-6 w-6 rotate-90 text-muted lg:rotate-0" />
+          </div>
+
+          {/* Pillar 3 */}
+          <div className="rounded-card border border-border bg-surface p-6 text-center">
+            <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent">
+              <Smartphone className="h-6 w-6" />
+            </span>
+            <h3 className="mt-4 font-semibold">Mobile Apps</h3>
+            <p className="mt-1 text-sm font-medium text-accent">Dashboard &amp; Control</p>
+            <p className="mt-2 text-sm text-muted">Live dashboards, two-way control and push alerts on iOS &amp; Android — from anywhere.</p>
+          </div>
+        </div>
+
+        <p className="mt-8 text-center text-sm text-muted">
+          <span className="font-semibold text-foreground">Sense → Automate → Control.</span>{" "}
+          The platform senses, n8n decides and acts, and the apps keep you in control.
+        </p>
+      </section>
+
       {/* Features */}
       <section id="features" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="mx-auto max-w-2xl text-center">

@@ -210,24 +210,247 @@ ${common(flow, [
   "A ticket is created (Jira/Sheet) and the team is notified on Slack.",
 ])}`,
   },
+  {
+    slug: "smart-city-parking-guidance-esp32-n8n",
+    title: "Smart City: ESP32 Parking Guidance with Ultrasonic Sensors & n8n",
+    excerpt:
+      "Help drivers find a free bay fast. ESP32 + HC-SR04 sensors report each parking bay to IoTFlow, and an n8n flow updates a guidance sign and logs occupancy.",
+    category: "Projects",
+    tags: ["ESP32", "Smart City", "n8n"],
+    flow: "/blog/smart-city-flow.svg",
+    likes: 19,
+    body: (flow) => `# Smart Parking Guidance
+
+Circling for parking wastes fuel and time. Cheap **ESP32 + HC-SR04** sensors
+detect whether each bay is occupied and report it to IoTFlow; an **n8n** flow
+updates a "spaces free" sign and logs occupancy for planning.
+
+## Device code (ESP32)
+
+\`\`\`cpp
+iot.virtualWrite("occupancy", bayOccupied() ? 1 : 0);
+\`\`\`
+${common(flow, [
+  "The Webhook receives each bay's occupancy (metric = occupancy).",
+  "An IF node checks whether a bay just became free.",
+  "An HTTP Request updates the guidance sign; a Sheets node logs the count.",
+])}`,
+  },
+  {
+    slug: "retail-cooler-monitoring-esp8266-n8n",
+    title: "Retail: Keep Fridges & Coolers Safe with an ESP8266 & n8n",
+    excerpt:
+      "Spoiled stock is lost revenue. An ESP8266 watches cooler temperature and an n8n flow escalates to the store on WhatsApp and email before product is at risk.",
+    category: "Projects",
+    tags: ["ESP8266", "Retail", "n8n", "Cold Chain"],
+    flow: "/blog/retail-cooler-flow.svg",
+    likes: 24,
+    body: (flow) => `# Retail Cooler Monitoring
+
+A single warm night can ruin a fridge of stock. An **ESP8266** with a DS18B20
+probe reports cooler temperature to IoTFlow; an **n8n** flow alerts the store
+team the moment it drifts out of range.
+
+## Device code (ESP8266)
+
+\`\`\`cpp
+iot.virtualWrite("temperature", readCoolerTemp());
+\`\`\`
+
+Add a threshold alert (temperature > 6°C) — that alert triggers the flow.
+${common(flow, [
+  "The Webhook receives the ALERT (metric = temperature).",
+  "An IF node checks temperature > 6°C.",
+  "A WhatsApp + Email node notifies the store manager with the cooler name.",
+])}`,
+  },
+  {
+    slug: "water-tank-auto-refill-arduino-n8n",
+    title: "Water Management: Auto Tank Refill with an Arduino & n8n",
+    excerpt:
+      "Never run a tank dry. An Arduino float sensor reports tank level to IoTFlow, and an n8n flow starts the fill pump when the level drops — and stops it when full.",
+    category: "Projects",
+    tags: ["Arduino", "Water", "n8n"],
+    flow: "/blog/water-tank-flow.svg",
+    likes: 21,
+    body: (flow) => `# Auto Tank Refill
+
+Manual tank top-ups are easy to forget. An **Arduino** float/ultrasonic sensor
+reports the level to IoTFlow; an **n8n** flow runs the fill pump between low and
+high thresholds.
+
+## Device code (Arduino)
+
+\`\`\`cpp
+iot.onCommand([](const String& pin, float v, const String&){
+  if (pin == "pump") digitalWrite(PUMP, v > 0 ? HIGH : LOW);
+});
+iot.virtualWrite("level", readLevelPercent());   // 0..100 %
+\`\`\`
+
+Add a **Gauge** on \`level\` and a **Switch** on \`pump\` to watch and override.
+${common(flow, [
+  "The Webhook receives the level reading (metric = level).",
+  "An IF node checks level < 20% (low).",
+  "An HTTP Request starts the pump; another stops it once the tank is full.",
+])}`,
+  },
+  {
+    slug: "fleet-cold-chain-gps-raspberry-pi-n8n",
+    title: "Logistics: Fleet Cold-Chain Tracking with Raspberry Pi GPS & n8n",
+    excerpt:
+      "Prove your cold chain in transit. A Raspberry Pi streams truck temperature and GPS to IoTFlow, and an n8n flow alerts dispatch and logs the trip when it drifts.",
+    category: "Projects",
+    tags: ["Raspberry Pi", "Logistics", "n8n", "Cold Chain"],
+    flow: "/blog/fleet-coldchain-flow.svg",
+    likes: 26,
+    body: (flow) => `# Fleet Cold-Chain Tracking
+
+Rejected deliveries are expensive. A **Raspberry Pi** with a temperature probe
+and a GPS module streams both to IoTFlow — plotted live on the map — and an
+**n8n** flow escalates to dispatch the moment the reefer drifts out of range.
+
+## Device code (Raspberry Pi, Python)
+
+\`\`\`python
+iot.send(temperature=read_probe(), gps={"lat": lat, "lng": lng})
+\`\`\`
+${common(flow, [
+  "The Webhook receives truck telemetry (temperature + GPS).",
+  "An IF node checks whether it is out of range or off-route.",
+  "A Slack node alerts dispatch; a Sheets node logs the full trip.",
+])}`,
+  },
+  {
+    slug: "smart-building-co2-hvac-esp32-n8n",
+    title: "Smart Buildings: Demand-Controlled HVAC with CO₂ Sensing & n8n",
+    excerpt:
+      "Fresh air without wasting energy. An ESP32 + SCD30 measures room CO₂; an n8n flow boosts ventilation only when it's needed, then eases off.",
+    category: "Projects",
+    tags: ["ESP32", "Smart Building", "n8n"],
+    flow: "/blog/smart-building-flow.svg",
+    likes: 22,
+    body: (flow) => `# Demand-Controlled Ventilation
+
+Running HVAC flat-out wastes energy; running it too little makes rooms stuffy.
+An **ESP32 + SCD30** measures CO₂ and reports it to IoTFlow; an **n8n** flow
+boosts ventilation only when CO₂ climbs.
+
+## Device code (ESP32)
+
+\`\`\`cpp
+iot.virtualWrite("co2", readCO2ppm());
+\`\`\`
+${common(flow, [
+  "The Webhook receives the CO₂ reading (metric = co2).",
+  "An IF node checks CO₂ > 1000 ppm.",
+  "An HTTP Request boosts the HVAC (pin hvac), easing off when it recovers.",
+])}`,
+  },
+  {
+    slug: "why-n8n-is-a-perfect-fit-for-iot",
+    title: "Why n8n Is a Perfect Fit for IoT",
+    excerpt:
+      "The winning IoT stack splits the work three ways: the IoT platform connects and senses, n8n handles actions and alerts, and mobile apps give you the dashboard and control. Here's why that combination is so powerful.",
+    category: "Guides",
+    tags: ["n8n", "Architecture", "Automation"],
+    flow: "/blog/why-n8n-flow.svg",
+    likes: 48,
+    body: (flow) => `# Why n8n Is a Perfect Fit for IoT
+
+Most IoT projects don't fail at *sensing* — they fail at everything that has to
+happen **after** a reading arrives: the alerts, the escalations, the "if this
+then that" logic, the logging, the integrations. That's exactly where **n8n**
+shines. The winning stack splits the work three ways, and each part does what
+it's best at.
+
+![How IoTFlow, n8n and the mobile apps work together](${flow})
+
+## The three-part IoT stack
+
+### 1) IoT platform — connection & sensing
+The platform's job is to **connect devices and capture data reliably**. Arduino,
+ESP32, ESP8266 and Raspberry Pi push readings over **MQTT or HTTP**; the platform
+normalizes them into metrics, tracks device online/offline status, and stores the
+history. It's the sensory nervous system: always on, always listening.
+
+### 2) n8n — actions & alerts
+Once a reading exists, **what should happen?** That's business logic, and it
+changes constantly — so you don't want it buried in firmware. n8n takes over as
+the **automation brain**: every telemetry reading, alert, or command is forwarded
+to an n8n **Webhook**, where drag-and-drop nodes decide the outcome — notify on
+Slack/Email/SMS/WhatsApp, open a ticket, log to a spreadsheet, call an AI model,
+or **call back to control the device**. Change the rules in seconds, no reflashing.
+
+### 3) Mobile apps — dashboard & control
+People don't sit at a desk watching dashboards. The **iOS and Android apps** put
+the live dashboard and **two-way control** in your pocket: check a gauge, flip a
+relay, trigger a flow — from anywhere, with push notifications when something
+needs you.
+
+## Why the combination wins
+
+- **Separation of concerns.** Firmware stays simple (just sense + obey commands).
+  Logic lives in n8n where it's easy to change. UX lives in the apps.
+- **No code for the hard part.** The automation layer — usually the most brittle,
+  most-changed code — becomes a visual flow anyone on the team can edit.
+- **400+ integrations for free.** Because n8n already speaks to Slack, Sheets,
+  Telegram, databases and AI, your sensor instantly plugs into your whole stack.
+- **Real-time both ways.** Sense → decide → act → notify, in seconds, with the
+  human in the loop on mobile when it matters.
+
+## Try the pattern in minutes
+
+1. Connect a device (the platform sends copy-paste ESP32/Pi code).
+2. Add a dashboard widget to see it live — on web and mobile.
+3. In IoTFlow → **Automations**, point a device event at an n8n **Webhook**.
+4. Build the action in n8n and hit **Test**.
+
+> IoT platform senses. n8n decides and acts. Mobile keeps you in control.
+> That's a complete, low-code IoT solution — without the heavyweight complexity.
+
+Happy building! 🚀
+`,
+  },
 ];
 
 async function main() {
+  // Idempotent: skip if the blog already has posts (safe to run on every deploy).
+  // Set BLOG_SEED_FORCE=1 to wipe and reseed.
+  const force = process.env.BLOG_SEED_FORCE === "1";
+  const existing = await prisma.blogPost.count().catch(() => -1);
+  if (existing === -1) {
+    console.warn("[blog-seed] blog tables not ready — skipping.");
+    return;
+  }
+  if (existing > 0 && !force) {
+    console.log(`[blog-seed] ${existing} post(s) already present — skipping (BLOG_SEED_FORCE=1 to reseed).`);
+    return;
+  }
+
   // Author the posts as the first admin (falls back to the demo admin).
   const admin =
     (await prisma.user.findUnique({ where: { email: "admin@demo.io" } })) ??
     (await prisma.user.findFirst({ where: { role: "ADMIN" }, orderBy: { createdAt: "asc" } }));
-  if (!admin) throw new Error("No admin user found — create an admin first.");
+  if (!admin) {
+    console.warn("[blog-seed] no admin user yet — skipping blog seed.");
+    return;
+  }
 
-  // Clean slate for blog data
-  await prisma.blogReview.deleteMany();
-  await prisma.blogPost.deleteMany();
-  await prisma.blogTag.deleteMany();
-  await prisma.blogCategory.deleteMany();
+  if (force) {
+    await prisma.blogReview.deleteMany();
+    await prisma.blogPost.deleteMany();
+    await prisma.blogTag.deleteMany();
+    await prisma.blogCategory.deleteMany();
+  }
 
   const catByName: Record<string, string> = {};
   for (const name of CATEGORIES) {
-    const c = await prisma.blogCategory.create({ data: { name, slug: slugify(name) } });
+    const c = await prisma.blogCategory.upsert({
+      where: { slug: slugify(name) },
+      update: { name },
+      create: { name, slug: slugify(name) },
+    });
     catByName[name] = c.id;
   }
 
@@ -267,4 +490,6 @@ async function main() {
   console.log(`Seeded ${POSTS.length} posts, ${CATEGORIES.length} categories.`);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect());
+// Never exit non-zero — this runs in the container start chain and must not
+// block the server from starting if seeding hiccups.
+main().catch((e) => { console.error("[blog-seed]", e); }).finally(() => prisma.$disconnect());

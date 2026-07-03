@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db/prisma";
 import { renderMarkdown } from "@/lib/markdown";
 import { LikeButton } from "@/components/blog/like-button";
 import { Reviews } from "@/components/blog/reviews";
+import { ShareButtons } from "@/components/blog/share-buttons";
+import { LeadMagnet } from "@/components/blog/lead-magnet";
 
 export const dynamic = "force-dynamic";
 
@@ -59,8 +61,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       {/* Content */}
       <div className="mt-8 max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
 
-      {/* Tags + like */}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
+      {/* Lead magnet — content upgrade */}
+      <LeadMagnet title={post.title} />
+
+      {/* Tags + share + like */}
+      <div className="mt-8 flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           {post.tags.map((t) => (
             <Link
@@ -72,7 +77,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </Link>
           ))}
         </div>
-        <LikeButton slug={post.slug} initial={post.likes} />
+        <div className="flex flex-wrap items-center gap-4">
+          <ShareButtons title={post.title} />
+          <LikeButton slug={post.slug} initial={post.likes} />
+        </div>
       </div>
 
       <Reviews slug={post.slug} />
