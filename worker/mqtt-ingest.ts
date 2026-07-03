@@ -19,8 +19,8 @@ import {
   TELEMETRY_TOPIC_WILDCARD,
   deviceIdFromTopic,
 } from "@/lib/mqtt/topics";
+import { getMqttConfig } from "@/lib/app-config";
 
-const BROKER_URL = process.env.MQTT_BROKER_URL || "mqtt://localhost:1883";
 const OFFLINE_SECONDS = Number(process.env.DEVICE_OFFLINE_SECONDS || 120);
 const SWEEP_INTERVAL_MS = 60 * 1000;
 
@@ -85,11 +85,14 @@ async function startOfflineSweep() {
   setInterval(run, SWEEP_INTERVAL_MS);
 }
 
-function main() {
-  log(`connecting to ${BROKER_URL}`);
-  const client = mqtt.connect(BROKER_URL, {
-    username: process.env.MQTT_USERNAME || undefined,
-    password: process.env.MQTT_PASSWORD || undefined,
+async function main() {
+  // Broker settings come from the Admin → Settings page (AppConfig), falling
+  // back to MQTT_* env vars.
+  const cfg = await getMqttConfig();
+  log(`connecting to ${cfg.brokerUrl}`);
+  const client = mqtt.connect(cfg.brokerUrl, {
+    username: cfg.username,
+    password: cfg.password,
     reconnectPeriod: 5000,
   });
 
@@ -118,4 +121,4 @@ function main() {
   process.on("SIGTERM", shutdown);
 }
 
-main();
+void main();

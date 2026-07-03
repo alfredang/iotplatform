@@ -17,11 +17,19 @@ type Config = {
   alertEmail: string;
   emailAlertsEnabled: boolean;
   hasPassword: boolean;
+  n8nBaseUrl: string;
+  hasN8nApiKey: boolean;
+  mqttBrokerUrl: string;
+  mqttUsername: string;
+  mqttPublicHost: string;
+  hasMqttPassword: boolean;
 };
+
+type FormExtra = { smtpPassword?: string; n8nApiKey?: string; mqttPassword?: string };
 
 export function EmailSettings() {
   const { data, isLoading, mutate } = useSWR<{ config: Config }>("/api/admin/config", fetcher);
-  const [form, setForm] = useState<Partial<Config> & { smtpPassword?: string }>({});
+  const [form, setForm] = useState<Partial<Config> & FormExtra>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +39,7 @@ export function EmailSettings() {
   const val = <K extends keyof Config>(k: K): Config[K] =>
     (form[k] ?? cfg?.[k]) as Config[K];
 
-  function set(k: keyof Config | "smtpPassword") {
+  function set(k: keyof Config | keyof FormExtra) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((f) => ({ ...f, [k]: e.target.value }));
   }
@@ -43,7 +51,7 @@ export function EmailSettings() {
     setSaved(false);
     try {
       await apiFetch("/api/admin/config", { method: "PUT", body: JSON.stringify(form) });
-      setForm((f) => ({ ...f, smtpPassword: "" }));
+      setForm((f) => ({ ...f, smtpPassword: "", n8nApiKey: "", mqttPassword: "" }));
       setSaved(true);
       mutate();
       setTimeout(() => setSaved(false), 2500);
@@ -127,6 +135,55 @@ export function EmailSettings() {
           <Field label="From address">
             <Input value={val("smtpFrom") || ""} onChange={set("smtpFrom")} placeholder="IoT Platform <no-reply@acme.io>" />
           </Field>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>n8n integration</CardTitle>
+          {cfg.hasN8nApiKey && <Badge tone="success">API key set</Badge>}
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <p className="text-sm text-muted">
+            Connect the low-code automation engine. When set, the Automations page
+            shows your workflows and events are forwarded to n8n. Overrides the
+            <code className="mx-1 rounded bg-surface-2 px-1">N8N_*</code> env vars.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="n8n base URL">
+              <Input value={val("n8nBaseUrl") || ""} onChange={set("n8nBaseUrl")} placeholder="https://n8n.example.com" />
+            </Field>
+            <Field label="n8n API key" hint={cfg.hasN8nApiKey ? "Leave blank to keep current." : "Settings → API in n8n"}>
+              <Input type="password" value={form.n8nApiKey ?? ""} onChange={set("n8nApiKey")} placeholder="••••••••" />
+            </Field>
+          </div>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>MQTT broker</CardTitle>
+          {cfg.hasMqttPassword && <Badge tone="success">Password set</Badge>}
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <p className="text-sm text-muted">
+            The broker the server publishes control commands to. Overrides the
+            <code className="mx-1 rounded bg-surface-2 px-1">MQTT_*</code> env vars.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Broker URL">
+              <Input value={val("mqttBrokerUrl") || ""} onChange={set("mqttBrokerUrl")} placeholder="mqtt://broker:1883" />
+            </Field>
+            <Field label="Public host:port" hint="Shown in device sample code.">
+              <Input value={val("mqttPublicHost") || ""} onChange={set("mqttPublicHost")} placeholder="broker.example.com:1883" />
+            </Field>
+            <Field label="Username">
+              <Input value={val("mqttUsername") || ""} onChange={set("mqttUsername")} placeholder="(optional)" />
+            </Field>
+            <Field label="Password" hint={cfg.hasMqttPassword ? "Leave blank to keep current." : undefined}>
+              <Input type="password" value={form.mqttPassword ?? ""} onChange={set("mqttPassword")} placeholder="••••••••" />
+            </Field>
+          </div>
         </CardBody>
       </Card>
 

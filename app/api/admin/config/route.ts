@@ -14,6 +14,14 @@ const configSchema = z.object({
   smtpFrom: z.string().trim().max(200).optional().or(z.literal("")),
   alertEmail: z.string().trim().max(200).optional().or(z.literal("")),
   emailAlertsEnabled: z.boolean().optional(),
+  // n8n
+  n8nBaseUrl: z.string().trim().max(300).optional().or(z.literal("")),
+  n8nApiKey: z.string().max(2000).optional(), // write-only; blank keeps current
+  // MQTT
+  mqttBrokerUrl: z.string().trim().max(300).optional().or(z.literal("")),
+  mqttUsername: z.string().trim().max(200).optional().or(z.literal("")),
+  mqttPassword: z.string().max(400).optional(), // write-only; blank keeps current
+  mqttPublicHost: z.string().trim().max(200).optional().or(z.literal("")),
 });
 
 async function getConfig() {
@@ -38,6 +46,14 @@ export async function GET() {
         alertEmail: cfg.alertEmail ?? "",
         emailAlertsEnabled: cfg.emailAlertsEnabled,
         hasPassword: Boolean(cfg.smtpPassword),
+        // n8n
+        n8nBaseUrl: cfg.n8nBaseUrl ?? "",
+        hasN8nApiKey: Boolean(cfg.n8nApiKey),
+        // MQTT
+        mqttBrokerUrl: cfg.mqttBrokerUrl ?? "",
+        mqttUsername: cfg.mqttUsername ?? "",
+        mqttPublicHost: cfg.mqttPublicHost ?? "",
+        hasMqttPassword: Boolean(cfg.mqttPassword),
       },
     });
   } catch (err) {
@@ -64,6 +80,14 @@ export async function PUT(req: Request) {
         ...(data.emailAlertsEnabled !== undefined
           ? { emailAlertsEnabled: data.emailAlertsEnabled }
           : {}),
+        // n8n
+        ...(data.n8nBaseUrl !== undefined ? { n8nBaseUrl: data.n8nBaseUrl || null } : {}),
+        ...(data.n8nApiKey ? { n8nApiKey: data.n8nApiKey } : {}),
+        // MQTT
+        ...(data.mqttBrokerUrl !== undefined ? { mqttBrokerUrl: data.mqttBrokerUrl || null } : {}),
+        ...(data.mqttUsername !== undefined ? { mqttUsername: data.mqttUsername || null } : {}),
+        ...(data.mqttPassword ? { mqttPassword: data.mqttPassword } : {}),
+        ...(data.mqttPublicHost !== undefined ? { mqttPublicHost: data.mqttPublicHost || null } : {}),
       },
     });
     return Response.json({ ok: true, emailAlertsEnabled: config.emailAlertsEnabled });

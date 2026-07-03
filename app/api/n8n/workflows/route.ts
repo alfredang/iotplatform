@@ -1,6 +1,6 @@
 import { requireApiUser } from "@/lib/auth/rbac";
 import { handleApiError } from "@/lib/api";
-import { listWorkflows, n8nConfigured, N8N_BASE_URL, n8nEditorUrl } from "@/lib/n8n";
+import { listWorkflows, n8nConfigured, n8nBaseUrl, n8nEditorUrl } from "@/lib/n8n";
 
 export const dynamic = "force-dynamic";
 
@@ -11,14 +11,15 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     await requireApiUser();
-    if (!n8nConfigured()) {
+    if (!(await n8nConfigured())) {
       return Response.json({ configured: false, baseUrl: null, workflows: [] });
     }
+    const baseUrl = await n8nBaseUrl();
     const workflows = await listWorkflows(100);
     return Response.json({
       configured: true,
-      baseUrl: N8N_BASE_URL,
-      workflows: workflows.map((w) => ({ ...w, editorUrl: n8nEditorUrl(w.id) })),
+      baseUrl,
+      workflows: workflows.map((w) => ({ ...w, editorUrl: n8nEditorUrl(baseUrl, w.id) })),
     });
   } catch (err) {
     return handleApiError(err);

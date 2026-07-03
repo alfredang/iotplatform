@@ -403,6 +403,14 @@ model AppConfig {
   smtpFrom           String?
   alertEmail         String? // default recipient for alert notifications
   emailAlertsEnabled Boolean  @default(false)
+  // n8n integration (falls back to N8N_BASE_URL / N8N_API_KEY env vars)
+  n8nBaseUrl         String?
+  n8nApiKey          String?
+  // MQTT broker (falls back to MQTT_* env vars)
+  mqttBrokerUrl      String? // e.g. mqtt://broker:1883
+  mqttUsername       String?
+  mqttPassword       String?
+  mqttPublicHost     String? // host:port shown in device sample code
   updatedAt          DateTime @updatedAt @default(now())
 }
 

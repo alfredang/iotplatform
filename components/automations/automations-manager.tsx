@@ -173,7 +173,7 @@ function N8nStatus({
             <p className="text-sm text-muted">
               {n8n.configured
                 ? `${n8n.baseUrl} · ${n8n.workflows.length} workflow(s)`
-                : "Set N8N_BASE_URL and N8N_API_KEY to enable low-code automations."}
+                : "Configure n8n in Admin → Settings (or set the N8N_* env vars) to enable low-code automations."}
             </p>
           </div>
         </div>

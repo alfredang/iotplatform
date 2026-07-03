@@ -12,11 +12,17 @@
  *  2. Webhook delivery — POST an event envelope to a workflow's webhook URL.
  */
 
-export const N8N_BASE_URL = (process.env.N8N_BASE_URL || "").replace(/\/$/, "");
-const N8N_API_KEY = process.env.N8N_API_KEY || "";
+import { getN8nConfig } from "@/lib/app-config";
 
-export function n8nConfigured(): boolean {
-  return Boolean(N8N_BASE_URL && N8N_API_KEY);
+/** Whether n8n is configured (via Admin settings or env). */
+export async function n8nConfigured(): Promise<boolean> {
+  const { baseUrl, apiKey } = await getN8nConfig();
+  return Boolean(baseUrl && apiKey);
+}
+
+/** The configured n8n base URL (Admin settings or env). */
+export async function n8nBaseUrl(): Promise<string> {
+  return (await getN8nConfig()).baseUrl;
 }
 
 export type N8nWorkflow = {
@@ -29,16 +35,17 @@ export type N8nWorkflow = {
 };
 
 /** Deep-link to a workflow in the n8n editor. */
-export function n8nEditorUrl(workflowId: string): string {
-  return `${N8N_BASE_URL}/workflow/${workflowId}`;
+export function n8nEditorUrl(baseUrl: string, workflowId: string): string {
+  return `${baseUrl}/workflow/${workflowId}`;
 }
 
 async function n8nApi<T>(path: string, init?: RequestInit): Promise<T> {
-  if (!n8nConfigured()) throw new Error("n8n is not configured");
-  const res = await fetch(`${N8N_BASE_URL}/api/v1${path}`, {
+  const { baseUrl, apiKey } = await getN8nConfig();
+  if (!baseUrl || !apiKey) throw new Error("n8n is not configured");
+  const res = await fetch(`${baseUrl}/api/v1${path}`, {
     ...init,
     headers: {
-      "X-N8N-API-KEY": N8N_API_KEY,
+      "X-N8N-API-KEY": apiKey,
       "Content-Type": "application/json",
       ...(init?.headers || {}),
     },

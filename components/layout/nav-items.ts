@@ -40,5 +40,5 @@ export const ADMIN_ITEMS: NavItem[] = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/blog", label: "Blog", icon: Newspaper },
   { href: "/admin/enquiries", label: "Enquiries", icon: Inbox },
-  { href: "/admin/email", label: "Email & Alerts", icon: Mail },
+  { href: "/admin/email", label: "Settings", icon: Mail },
 ];
