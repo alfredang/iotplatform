@@ -17,14 +17,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = await prisma.blogPost.findFirst({
-    where: { slug, published: true },
-    include: {
-      category: { select: { name: true, slug: true } },
-      tags: { select: { id: true, name: true, slug: true } },
-      author: { select: { name: true } },
-    },
-  });
+  const post = await prisma.blogPost
+    .findFirst({
+      where: { slug, published: true },
+      include: {
+        category: { select: { name: true, slug: true } },
+        tags: { select: { id: true, name: true, slug: true } },
+        author: { select: { name: true } },
+      },
+    })
+    .catch(() => null);
   if (!post) notFound();
 
   const html = renderMarkdown(post.content);

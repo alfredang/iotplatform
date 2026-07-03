@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "next start",
+    "start": "prisma migrate deploy && next start",
+    "start:no-migrate": "next start",
     "lint": "eslint",
     "worker": "tsx worker/mqtt-ingest.ts",
     "db:generate": "prisma generate",

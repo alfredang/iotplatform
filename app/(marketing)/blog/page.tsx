@@ -17,16 +17,20 @@ export default async function BlogIndex({
   const { category, tag } = await searchParams;
 
   const [posts, categories] = await Promise.all([
-    prisma.blogPost.findMany({
-      where: {
-        published: true,
-        ...(category ? { category: { slug: category } } : {}),
-        ...(tag ? { tags: { some: { slug: tag } } } : {}),
-      },
-      orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-      select: postCardSelect,
-    }),
-    prisma.blogCategory.findMany({ orderBy: { name: "asc" }, include: { _count: { select: { posts: true } } } }),
+    prisma.blogPost
+      .findMany({
+        where: {
+          published: true,
+          ...(category ? { category: { slug: category } } : {}),
+          ...(tag ? { tags: { some: { slug: tag } } } : {}),
+        },
+        orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+        select: postCardSelect,
+      })
+      .catch(() => []),
+    prisma.blogCategory
+      .findMany({ orderBy: { name: "asc" }, include: { _count: { select: { posts: true } } } })
+      .catch(() => []),
   ]);
 
   return (
