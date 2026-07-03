@@ -38,6 +38,10 @@ import { EnquiryForm } from "@/components/marketing/enquiry-form";
 import { WhatsAppButton } from "@/components/marketing/whatsapp-button";
 import { AppStoreBadge } from "@/components/marketing/app-store-badge";
 import { GithubIcon, LinkedinIcon } from "@/components/marketing/brand-icons";
+import { prisma } from "@/lib/db/prisma";
+import { postCardSelect } from "@/lib/blog";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "IoTFlow — Low-code IoT platform powered by n8n",
@@ -171,7 +175,16 @@ function NavBar() {
   );
 }
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const latestPosts = await prisma.blogPost
+    .findMany({
+      where: { published: true },
+      orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+      take: 3,
+      select: postCardSelect,
+    })
+    .catch(() => []);
+
   return (
     <>
       <NavBar />
@@ -182,7 +195,7 @@ export default function LandingPage() {
           <div className="absolute left-1/2 top-[-10%] h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
           <div className="absolute right-[10%] top-[20%] h-[280px] w-[280px] rounded-full bg-accent/20 blur-[120px]" />
         </div>
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:py-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:py-12">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Powered by n8n · Self-hosted · Open
@@ -219,7 +232,7 @@ export default function LandingPage() {
 
       {/* Overview */}
       <section className="border-y border-border bg-surface/50">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <div className="grid gap-8 text-center sm:grid-cols-4">
             <div>
               <p className="text-3xl font-bold text-primary">5 min</p>
@@ -242,7 +255,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
+      <section id="features" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Everything you need, nothing you don&apos;t
@@ -251,7 +264,7 @@ export default function LandingPage() {
             A focused feature set designed for makers, teams and beginners.
           </p>
         </div>
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f) => (
             <div
               key={f.title}
@@ -269,7 +282,7 @@ export default function LandingPage() {
 
       {/* How it works */}
       <section id="how" className="border-y border-border bg-surface/50">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               From sensor to automation in three steps
@@ -279,7 +292,7 @@ export default function LandingPage() {
               dashboard and forwards every event to n8n, where you build the logic.
             </p>
           </div>
-          <div className="mt-12 grid gap-5 md:grid-cols-3">
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
             {STEPS.map((s) => (
               <div key={s.title} className="rounded-card border border-border bg-background p-6">
                 <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -305,7 +318,7 @@ export default function LandingPage() {
       </section>
 
       {/* Tutorials */}
-      <section id="tutorials" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
+      <section id="tutorials" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Get started in 5 short tutorials
@@ -314,7 +327,7 @@ export default function LandingPage() {
             From zero to a live, automated IoT dashboard — no heavy code required.
           </p>
         </div>
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {TUTORIALS.map((t, i) => (
             <Link
               key={t.slug}
@@ -355,7 +368,7 @@ export default function LandingPage() {
       </section>
 
       {/* Industries */}
-      <section id="industries" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
+      <section id="industries" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Built for every industry
@@ -364,7 +377,7 @@ export default function LandingPage() {
             One platform, endless applications — connect, control and automate across sectors.
           </p>
         </div>
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {INDUSTRIES.map((ind) => (
             <div
               key={ind.title}
@@ -382,7 +395,7 @@ export default function LandingPage() {
 
       {/* Dashboard preview */}
       <section id="preview" className="border-y border-border bg-surface/50">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:py-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:py-12">
           <div>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               A clean dashboard your whole team will get
@@ -411,12 +424,12 @@ export default function LandingPage() {
       </section>
 
       {/* Use cases */}
-      <section id="use-cases" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
+      <section id="use-cases" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Built for real use cases</h2>
           <p className="mt-3 text-muted">From a single sensor to a whole fleet.</p>
         </div>
-        <div className="mt-12 grid gap-5 sm:grid-cols-2">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {USE_CASES.map((u) => (
             <div key={u.title} className="rounded-card border border-border bg-surface p-6">
               <h3 className="font-semibold">{u.title}</h3>
@@ -426,9 +439,54 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Latest from the blog */}
+      {latestPosts.length > 0 && (
+        <section className="border-y border-border bg-surface/50">
+          <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">From the blog</h2>
+                <p className="mt-3 text-muted">Hands-on IoT projects and n8n workflow automations.</p>
+              </div>
+              <Link href="/blog" className="hidden shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline sm:inline-flex">
+                View all posts <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {latestPosts.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/blog/${p.slug}`}
+                  className="group flex flex-col overflow-hidden rounded-card border border-border bg-surface transition hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
+                >
+                  {p.coverImage && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.coverImage} alt={p.title} className="h-40 w-full border-b border-border bg-white object-cover" />
+                  )}
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="flex items-center gap-2 text-xs text-muted">
+                      {p.category && <span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">{p.category.name}</span>}
+                      <span>{new Date(p.publishedAt).toLocaleDateString()}</span>
+                    </div>
+                    <h3 className="mt-2 font-semibold leading-snug group-hover:text-primary">{p.title}</h3>
+                    <p className="mt-2 line-clamp-2 flex-1 text-sm text-muted">{p.excerpt}</p>
+                    <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                      Read more <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-8 text-center sm:hidden">
+              <Link href="/blog"><Button variant="outline">View all posts</Button></Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Community / free */}
       <section className="border-y border-border bg-gradient-to-br from-primary/10 via-surface to-accent/10">
-        <div className="mx-auto max-w-4xl px-4 py-12 text-center sm:px-6">
+        <div className="mx-auto max-w-4xl px-4 py-8 text-center sm:px-6">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Free &amp; open for the community
           </h2>
@@ -450,7 +508,7 @@ export default function LandingPage() {
       </section>
 
       {/* Enquiry */}
-      <section id="contact" className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:py-16">
+      <section id="contact" className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="mx-auto mb-8 max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Get in touch</h2>
           <p className="mt-3 text-muted">
@@ -523,7 +581,7 @@ export default function LandingPage() {
             <ul className="mt-4 space-y-3 text-sm text-muted">
               <li className="flex items-start gap-2.5">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span>12 Woodlands Square #07-85/86/87 Woods Square<br />Tower 1, Singapore 737715</span>
+                <span className="whitespace-nowrap">12 Woodlands Square #07-85/86/87<br />Woods Square Tower 1, Singapore 737715</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 shrink-0 text-primary" />
