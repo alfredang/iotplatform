@@ -549,9 +549,9 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border bg-surface/50">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-6">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-7">
           {/* Brand */}
-          <div>
+          <div className="col-span-2">
             <Logo href="/" size="sm" />
             <p className="mt-4 text-sm text-muted">
               A low-code, self-hosted IoT platform powered by n8n — connect,
@@ -640,6 +640,10 @@ export default async function LandingPage() {
         <div className="border-t border-border">
           <p className="mx-auto max-w-6xl px-4 py-5 text-center text-xs text-muted sm:px-6">
             © {new Date().getFullYear()} Tertiary Infotech Academy Pte Ltd. All rights reserved. · UEN 201200696W
+            {" · "}Powered by{" "}
+            <a href="https://www.tertiaryinfotech.com/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+              Tertiary Infotech Academy Pte Ltd
+            </a>
           </p>
         </div>
       </footer>

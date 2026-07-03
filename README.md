@@ -82,8 +82,8 @@ log or call AI.
 - **Authentication** — email/password, OTP email codes, Google & GitHub OAuth
   (OAuth/SMTP activate automatically when configured); Admin & User roles.
 - **Blog / CMS** — admin-authored posts with categories, tags, social likes and
-  star reviews; public `/blog` with category/tag filters. Ships 5 IoT + n8n
-  project articles (each with an n8n workflow diagram).
+  star reviews; public `/blog` with category/tag filters. Ships 11 IoT + n8n
+  articles (10 project builds, each with an n8n workflow diagram).
 - **Step-by-step tutorials** — public `/tutorials` guides (with screenshots)
   covering the whole loop: connect → visualise → control → automate.
 - **Admin area** — manage users/roles, deactivate accounts, API keys, blog and

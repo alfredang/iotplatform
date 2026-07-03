@@ -198,7 +198,12 @@ export default function PrivacyPolicyPage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-3xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted sm:flex-row sm:px-6">
-          <p>© {new Date().getFullYear()} IoTFlow · Tertiary Infotech Pte Ltd</p>
+          <p>
+            © {new Date().getFullYear()} IoTFlow · Powered by{" "}
+            <a href="https://www.tertiaryinfotech.com/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+              Tertiary Infotech Academy Pte Ltd
+            </a>
+          </p>
           <div className="flex gap-4">
             <Link href="/" className="hover:text-foreground">Home</Link>
             <Link href="/#contact" className="hover:text-foreground">Contact</Link>
