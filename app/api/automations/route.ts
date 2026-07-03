@@ -25,7 +25,7 @@ export async function GET(req: Request) {
 /** POST /api/automations — link a platform event to an n8n webhook. */
 export async function POST(req: Request) {
   try {
-    const user = await requireApiUser("USER");
+    const user = await requireApiUser("ADMIN");
     const url = new URL(req.url);
     const project = await resolveProject(user.id, url.searchParams.get("projectId"));
     const data = await parseBody(req, automationSchema);

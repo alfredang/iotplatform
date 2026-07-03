@@ -10,10 +10,10 @@ function setViewAs(value: "user" | "admin", router: ReturnType<typeof useRouter>
 }
 
 /** Compact control in the sidebar for admins to switch their view. */
-export function ViewAsToggle({ viewAs }: { viewAs: "user" | "admin" }) {
+export function ViewAsToggle({ viewAs, compact = false }: { viewAs: "user" | "admin"; compact?: boolean }) {
   const router = useRouter();
   return (
-    <div className="px-3 pb-2">
+    <div className={compact ? "" : "px-3 pb-2"}>
       <div className="flex items-center gap-1 rounded-lg border border-border bg-surface-2 p-1 text-xs">
         <button
           onClick={() => setViewAs("admin", router)}

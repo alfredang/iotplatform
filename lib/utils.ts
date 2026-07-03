@@ -37,6 +37,17 @@ export function humanize(s: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** URL-safe slug from a title, e.g. "My Post!" -> "my-post". */
+export function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
 /** Common unit suffix for well-known metric names. */
 export function metricUnit(metric: string): string {
   const m = metric.toLowerCase();

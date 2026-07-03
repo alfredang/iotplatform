@@ -86,6 +86,7 @@ model User {
   apiKeys     ApiKey[]
   projects    Project[]
   automations Automation[]
+  blogPosts   BlogPost[]
 }
 
 // Auth.js adapter models
@@ -403,4 +404,60 @@ model AppConfig {
   alertEmail         String? // default recipient for alert notifications
   emailAlertsEnabled Boolean  @default(false)
   updatedAt          DateTime @updatedAt @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Blog / CMS — admin-authored posts with categories, tags, likes and star
+// reviews. Public read; admin-only write.
+// ---------------------------------------------------------------------------
+model BlogPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  excerpt     String
+  content     String // markdown
+  coverImage  String?
+  published   Boolean   @default(true)
+  featured    Boolean   @default(false)
+  likes       Int       @default(0)
+  authorId    String
+  categoryId  String?
+  publishedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags     BlogTag[]     @relation("BlogPostTags")
+  reviews  BlogReview[]
+
+  @@index([categoryId])
+  @@index([publishedAt])
+}
+
+model BlogCategory {
+  id    String     @id @default(cuid())
+  slug  String     @unique
+  name  String
+  posts BlogPost[]
+}
+
+model BlogTag {
+  id    String     @id @default(cuid())
+  slug  String     @unique
+  name  String
+  posts BlogPost[] @relation("BlogPostTags")
+}
+
+model BlogReview {
+  id        String   @id @default(cuid())
+  postId    String
+  rating    Int // 1..5 stars
+  name      String?
+  comment   String?
+  createdAt DateTime @default(now())
+
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
 }

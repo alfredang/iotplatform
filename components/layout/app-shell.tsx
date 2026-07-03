@@ -154,6 +154,11 @@ export function AppShell({
             <Logo href="/dashboard" size="sm" />
           </div>
           <div className="ml-auto flex items-center gap-3">
+            {realRole === "ADMIN" && (
+              <div className="hidden sm:block">
+                <ViewAsToggle viewAs={viewAs} compact />
+              </div>
+            )}
             <ThemeToggle />
             <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-2.5 py-1.5">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">

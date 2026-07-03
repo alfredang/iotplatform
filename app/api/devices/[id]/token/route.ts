@@ -9,7 +9,7 @@ type Ctx = { params: Promise<{ id: string }> };
 /** POST: revoke existing tokens and issue a fresh device token (shown once). */
 export async function POST(_req: Request, { params }: Ctx) {
   try {
-    const user = await requireApiUser("USER");
+    const user = await requireApiUser("ADMIN");
     const { id } = await params;
     await getOwnedDevice(id, user.id);
 

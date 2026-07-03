@@ -14,6 +14,7 @@ import {
   Workflow,
   BookOpen,
   GraduationCap,
+  Newspaper,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ export const NAV_ITEMS: NavItem[] = [
 /** Admin-only navigation (shown when the effective role is ADMIN). */
 export const ADMIN_ITEMS: NavItem[] = [
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/blog", label: "Blog", icon: Newspaper },
   { href: "/admin/enquiries", label: "Enquiries", icon: Inbox },
   { href: "/admin/email", label: "Email & Alerts", icon: Mail },
 ];

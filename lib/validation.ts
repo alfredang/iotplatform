@@ -116,6 +116,30 @@ export const apiKeySchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
 });
 
+// ---- Blog / CMS ----
+export const blogPostSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(200),
+  slug: z.string().trim().max(200).optional(),
+  excerpt: z.string().trim().min(1, "Excerpt is required").max(500),
+  content: z.string().trim().min(1, "Content is required"),
+  coverImage: z.string().trim().max(500).optional().or(z.literal("")),
+  categoryId: z.string().optional().nullable(),
+  tags: z.array(z.string().trim().min(1).max(60)).optional().default([]),
+  published: z.boolean().default(true),
+  featured: z.boolean().default(false),
+});
+export const blogPostUpdateSchema = blogPostSchema.partial();
+
+export const blogTaxonomySchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(80),
+});
+
+export const blogReviewSchema = z.object({
+  rating: z.coerce.number().int().min(1).max(5),
+  name: z.string().trim().max(80).optional().or(z.literal("")),
+  comment: z.string().trim().max(1000).optional().or(z.literal("")),
+});
+
 export const settingsSchema = z.object({
   name: z.string().trim().max(120).optional(),
   orgName: z.string().trim().max(160).optional(),

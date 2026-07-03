@@ -153,8 +153,8 @@ function NavBar() {
           <a href="#features" className="hover:text-foreground">Features</a>
           <a href="#how" className="hover:text-foreground">How it works</a>
           <a href="#tutorials" className="hover:text-foreground">Tutorial</a>
+          <Link href="/blog" className="hover:text-foreground">Blog</Link>
           <a href="#industries" className="hover:text-foreground">Industries</a>
-          <a href="#preview" className="hover:text-foreground">Dashboard</a>
           <a href="#contact" className="hover:text-foreground">Contact</a>
         </nav>
         <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function LandingPage() {
           <div className="absolute left-1/2 top-[-10%] h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
           <div className="absolute right-[10%] top-[20%] h-[280px] w-[280px] rounded-full bg-accent/20 blur-[120px]" />
         </div>
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:py-16">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Powered by n8n · Self-hosted · Open
@@ -219,7 +219,7 @@ export default function LandingPage() {
 
       {/* Overview */}
       <section className="border-y border-border bg-surface/50">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="grid gap-8 text-center sm:grid-cols-4">
             <div>
               <p className="text-3xl font-bold text-primary">5 min</p>
@@ -242,7 +242,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+      <section id="features" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Everything you need, nothing you don&apos;t
@@ -269,7 +269,7 @@ export default function LandingPage() {
 
       {/* How it works */}
       <section id="how" className="border-y border-border bg-surface/50">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               From sensor to automation in three steps
@@ -305,7 +305,7 @@ export default function LandingPage() {
       </section>
 
       {/* Tutorials */}
-      <section id="tutorials" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+      <section id="tutorials" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Get started in 5 short tutorials
@@ -355,7 +355,7 @@ export default function LandingPage() {
       </section>
 
       {/* Industries */}
-      <section id="industries" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+      <section id="industries" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Built for every industry
@@ -382,7 +382,7 @@ export default function LandingPage() {
 
       {/* Dashboard preview */}
       <section id="preview" className="border-y border-border bg-surface/50">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:py-16">
           <div>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               A clean dashboard your whole team will get
@@ -411,7 +411,7 @@ export default function LandingPage() {
       </section>
 
       {/* Use cases */}
-      <section id="use-cases" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+      <section id="use-cases" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Built for real use cases</h2>
           <p className="mt-3 text-muted">From a single sensor to a whole fleet.</p>
@@ -428,7 +428,7 @@ export default function LandingPage() {
 
       {/* Community / free */}
       <section className="border-y border-border bg-gradient-to-br from-primary/10 via-surface to-accent/10">
-        <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+        <div className="mx-auto max-w-4xl px-4 py-12 text-center sm:px-6">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Free &amp; open for the community
           </h2>
@@ -450,7 +450,7 @@ export default function LandingPage() {
       </section>
 
       {/* Enquiry */}
-      <section id="contact" className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:py-24">
+      <section id="contact" className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:py-16">
         <div className="mx-auto mb-8 max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Get in touch</h2>
           <p className="mt-3 text-muted">
@@ -462,31 +462,14 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border bg-surface/50">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-6">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div>
             <Logo href="/" size="sm" />
-            <p className="mt-4 max-w-xs text-sm text-muted">
+            <p className="mt-4 text-sm text-muted">
               A low-code, self-hosted IoT platform powered by n8n — connect,
               control and automate devices over MQTT &amp; HTTP.
             </p>
-            <p className="mt-5 text-xs font-medium text-muted">Get the mobile app</p>
-            <AppStoreBadge className="mt-2" />
-          </div>
-
-          {/* About */}
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">About</h3>
-            <ul className="mt-4 space-y-2 text-sm text-muted">
-              <li><a href="#features" className="hover:text-foreground">Features</a></li>
-              <li><a href="#how" className="hover:text-foreground">How it works</a></li>
-              <li><a href="#industries" className="hover:text-foreground">Industries</a></li>
-              <li>
-                <a href="https://www.tertiaryinfotech.com/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
-                  Tertiary Infotech
-                </a>
-              </li>
-            </ul>
             <div className="mt-5 flex items-center gap-3">
               <a
                 href="https://github.com/alfredang"
@@ -507,6 +490,22 @@ export default function LandingPage() {
             </div>
           </div>
 
+          {/* About */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">About</h3>
+            <ul className="mt-4 space-y-2 text-sm text-muted">
+              <li><a href="#features" className="hover:text-foreground">Features</a></li>
+              <li><a href="#how" className="hover:text-foreground">How it works</a></li>
+              <li><a href="#industries" className="hover:text-foreground">Industries</a></li>
+              <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
+              <li>
+                <a href="https://www.tertiaryinfotech.com/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+                  Tertiary Infotech
+                </a>
+              </li>
+            </ul>
+          </div>
+
           {/* Links */}
           <div>
             <h3 className="text-sm font-semibold text-foreground">Links</h3>
@@ -519,12 +518,12 @@ export default function LandingPage() {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="col-span-2">
             <h3 className="text-sm font-semibold text-foreground">Contact</h3>
             <ul className="mt-4 space-y-3 text-sm text-muted">
               <li className="flex items-start gap-2.5">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span>12 Woodlands Square #07-85/86/87<br />Woods Square Tower 1, Singapore 737715</span>
+                <span>12 Woodlands Square #07-85/86/87 Woods Square<br />Tower 1, Singapore 737715</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 shrink-0 text-primary" />
@@ -541,6 +540,13 @@ export default function LandingPage() {
                 </a>
               </li>
             </ul>
+          </div>
+
+          {/* Get the app */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Get the app</h3>
+            <p className="mt-4 text-sm text-muted">Monitor &amp; control your devices on the go.</p>
+            <AppStoreBadge className="mt-3" />
           </div>
         </div>
 
