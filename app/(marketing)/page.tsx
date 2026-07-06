@@ -549,9 +549,9 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border bg-surface/50">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-8">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)_minmax(0,1fr)_auto_12rem]">
           {/* Brand */}
-          <div className="col-span-2">
+          <div className="col-span-2 lg:col-span-1">
             <Logo href="/" size="sm" />
             <p className="mt-4 text-sm text-muted">
               A low-code, self-hosted IoT platform powered by n8n — connect,
@@ -605,12 +605,12 @@ export default async function LandingPage() {
           </div>
 
           {/* Contact */}
-          <div className="col-span-2">
+          <div className="col-span-2 lg:col-span-1">
             <h3 className="text-sm font-semibold text-foreground">Contact</h3>
             <ul className="mt-4 space-y-3 text-sm text-muted">
               <li className="flex items-start gap-2.5">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span>12 Woodlands Square #07-85/86/87<br />Woods Square Tower 1, Singapore 737715</span>
+                <span><span className="whitespace-nowrap">12 Woodlands Square #07-85/86/87</span><br /><span className="whitespace-nowrap">Woods Square Tower 1, Singapore 737715</span></span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 shrink-0 text-primary" />
@@ -630,7 +630,7 @@ export default async function LandingPage() {
           </div>
 
           {/* Get the app */}
-          <div className="col-span-2">
+          <div className="col-span-2 lg:col-span-1">
             <h3 className="text-sm font-semibold text-foreground">Get the app</h3>
             <p className="mt-4 text-sm text-muted">Monitor &amp; control your devices on the go.</p>
             <AppStoreBadge className="mt-3" />
