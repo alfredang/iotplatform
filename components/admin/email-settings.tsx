@@ -21,6 +21,8 @@ type Config = {
   gmailClientId: string;
   hasGmailClientSecret: boolean;
   hasGmailRefreshToken: boolean;
+  googleClientId: string;
+  hasGoogleClientSecret: boolean;
   n8nBaseUrl: string;
   hasN8nApiKey: boolean;
   mqttBrokerUrl: string;
@@ -33,6 +35,7 @@ type FormExtra = {
   smtpPassword?: string;
   gmailClientSecret?: string;
   gmailRefreshToken?: string;
+  googleClientSecret?: string;
   n8nApiKey?: string;
   mqttPassword?: string;
 };
@@ -68,6 +71,7 @@ export function EmailSettings() {
         smtpPassword: "",
         gmailClientSecret: "",
         gmailRefreshToken: "",
+        googleClientSecret: "",
         n8nApiKey: "",
         mqttPassword: "",
       }));
@@ -215,6 +219,43 @@ export function EmailSettings() {
           <Field label="From address">
             <Input value={val("smtpFrom") || ""} onChange={set("smtpFrom")} placeholder="IoT Platform <no-reply@acme.io>" />
           </Field>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Sign in with Google</CardTitle>
+          {cfg.googleClientId && cfg.hasGoogleClientSecret && (
+            <Badge tone="success">Enabled</Badge>
+          )}
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <p className="text-sm text-muted">
+            Shows a &quot;Continue with Google&quot; button on the login and
+            register pages when both fields are set. The OAuth client must have
+            this redirect URI:{" "}
+            <code className="rounded bg-surface-2 px-1">
+              {typeof window !== "undefined" ? window.location.origin : ""}
+              /api/auth/callback/google
+            </code>
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Client ID">
+              <Input
+                value={val("googleClientId") || ""}
+                onChange={set("googleClientId")}
+                placeholder="xxxx.apps.googleusercontent.com"
+              />
+            </Field>
+            <Field label="Client secret" hint={cfg.hasGoogleClientSecret ? "Leave blank to keep current." : undefined}>
+              <Input
+                type="password"
+                value={form.googleClientSecret ?? ""}
+                onChange={set("googleClientSecret")}
+                placeholder="••••••••"
+              />
+            </Field>
+          </div>
         </CardBody>
       </Card>
 

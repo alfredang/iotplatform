@@ -410,6 +410,10 @@ model AppConfig {
   gmailClientId      String?
   gmailClientSecret  String?
   gmailRefreshToken  String?
+  // "Sign in with Google" OAuth client (falls back to GOOGLE_CLIENT_ID /
+  // GOOGLE_CLIENT_SECRET env vars)
+  googleClientId     String?
+  googleClientSecret String?
   // n8n integration (falls back to N8N_BASE_URL / N8N_API_KEY env vars)
   n8nBaseUrl         String?
   n8nApiKey          String?

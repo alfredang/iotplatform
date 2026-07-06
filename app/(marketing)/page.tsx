@@ -193,10 +193,6 @@ export default async function LandingPage() {
                 <Button size="lg" variant="outline">See the dashboard</Button>
               </a>
             </div>
-            <p className="mt-4 text-sm text-muted">
-              Try the demo: <span className="font-mono text-foreground">admin@demo.io</span> /{" "}
-              <span className="font-mono text-foreground">password123</span>
-            </p>
           </div>
           <div className="lg:pl-6">
             <DashboardPreview />

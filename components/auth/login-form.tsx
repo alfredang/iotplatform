@@ -101,11 +101,6 @@ export function LoginForm({ google, github }: { google: boolean; github: boolean
           Create an account
         </Link>
       </p>
-
-      <p className="mt-4 rounded-lg bg-surface-2 p-3 text-center text-xs text-muted">
-        Demo login: <span className="font-mono">admin@demo.io</span> /{" "}
-        <span className="font-mono">password123</span>
-      </p>
     </div>
   );
 }

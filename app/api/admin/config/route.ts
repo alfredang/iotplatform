@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { requireAdminApi } from "@/lib/auth/rbac";
+import { bustOAuthCache } from "@/lib/auth/auth";
 import { handleApiError, parseBody } from "@/lib/api";
 import { z } from "zod";
 
@@ -19,6 +20,9 @@ const configSchema = z.object({
   gmailClientId: z.string().trim().max(300).optional().or(z.literal("")),
   gmailClientSecret: z.string().max(400).optional(),
   gmailRefreshToken: z.string().max(600).optional(),
+  // "Sign in with Google" (secret is write-only; blank keeps current)
+  googleClientId: z.string().trim().max(300).optional().or(z.literal("")),
+  googleClientSecret: z.string().max(400).optional(),
   // n8n
   n8nBaseUrl: z.string().trim().max(300).optional().or(z.literal("")),
   n8nApiKey: z.string().max(2000).optional(), // write-only; blank keeps current
@@ -56,6 +60,9 @@ export async function GET() {
         gmailClientId: cfg.gmailClientId ?? "",
         hasGmailClientSecret: Boolean(cfg.gmailClientSecret),
         hasGmailRefreshToken: Boolean(cfg.gmailRefreshToken),
+        // Google sign-in
+        googleClientId: cfg.googleClientId ?? "",
+        hasGoogleClientSecret: Boolean(cfg.googleClientSecret),
         // n8n
         n8nBaseUrl: cfg.n8nBaseUrl ?? "",
         hasN8nApiKey: Boolean(cfg.n8nApiKey),
@@ -95,6 +102,11 @@ export async function PUT(req: Request) {
         ...(data.gmailClientId !== undefined ? { gmailClientId: data.gmailClientId || null } : {}),
         ...(data.gmailClientSecret ? { gmailClientSecret: data.gmailClientSecret } : {}),
         ...(data.gmailRefreshToken ? { gmailRefreshToken: data.gmailRefreshToken } : {}),
+        // Google sign-in
+        ...(data.googleClientId !== undefined
+          ? { googleClientId: data.googleClientId || null }
+          : {}),
+        ...(data.googleClientSecret ? { googleClientSecret: data.googleClientSecret } : {}),
         // n8n
         ...(data.n8nBaseUrl !== undefined ? { n8nBaseUrl: data.n8nBaseUrl || null } : {}),
         ...(data.n8nApiKey ? { n8nApiKey: data.n8nApiKey } : {}),
@@ -105,6 +117,7 @@ export async function PUT(req: Request) {
         ...(data.mqttPublicHost !== undefined ? { mqttPublicHost: data.mqttPublicHost || null } : {}),
       },
     });
+    bustOAuthCache(); // pick up new sign-in credentials immediately
     return Response.json({ ok: true, emailAlertsEnabled: config.emailAlertsEnabled });
   } catch (err) {
     return handleApiError(err);
