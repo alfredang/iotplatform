@@ -10,7 +10,9 @@ RUN apk add --no-cache openssl
 # ---- Dependencies ----
 FROM base AS deps
 COPY package.json package-lock.json* ./
-RUN npm ci
+# The lockfile is intentionally untracked (see .gitignore), so `npm ci` would
+# fail in CI/Coolify builds — use `npm ci` only when a lockfile is present.
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # ---- Build ----
 FROM base AS build
