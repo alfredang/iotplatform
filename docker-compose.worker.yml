@@ -1,0 +1,11 @@
+# Standalone MQTT ingestion worker, deployable on its own (e.g. alongside a
+# separately hosted web app + database + broker). Mirrors the `worker`
+# service in docker-compose.yml, using the same Dockerfile `runner` stage but
+# overriding the command to run the worker instead of the web server.
+services:
+  worker:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    command: ["npm", "run", "worker"]
