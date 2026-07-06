@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
+import { bustRoleCache } from "@/lib/auth/auth";
 import { requireAdminApi, AuthError } from "@/lib/auth/rbac";
 import { handleApiError, parseBody } from "@/lib/api";
 import { adminUserUpdateSchema } from "@/lib/validation";
@@ -45,6 +46,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
       },
       select: { id: true, name: true, email: true, role: true, disabled: true },
     });
+    bustRoleCache(id);
     return Response.json({ user });
   } catch (err) {
     return handleApiError(err);
@@ -63,6 +65,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
     if (!target) throw new AuthError("User not found", 404);
 
     await prisma.user.delete({ where: { id } });
+    bustRoleCache(id);
     return Response.json({ ok: true });
   } catch (err) {
     return handleApiError(err);

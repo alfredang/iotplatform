@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
 import bcrypt from "bcryptjs";
+import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { verifyOtp } from "@/lib/otp";
 import { authConfig } from "./auth.config";
@@ -100,6 +101,31 @@ export function bustOAuthCache() {
   oauthCache = null;
 }
 
+// The JWT caches the role from sign-in time; without a refresh, promotions,
+// demotions and deactivations wouldn't apply until the user logs in again.
+// Lookups are cached briefly because auth() runs on every request.
+let roleCache = new Map<string, { role: Role; disabled: boolean; ts: number }>();
+const ROLE_CACHE_TTL_MS = 30_000;
+
+async function getFreshRole(userId: string) {
+  const hit = roleCache.get(userId);
+  if (hit && Date.now() - hit.ts < ROLE_CACHE_TTL_MS) return hit;
+  const user = await prisma.user
+    .findUnique({ where: { id: userId }, select: { role: true, disabled: true } })
+    .catch(() => null);
+  if (!user) return null;
+  const entry = { role: user.role, disabled: user.disabled, ts: Date.now() };
+  roleCache.set(userId, entry);
+  if (roleCache.size > 10_000) roleCache = new Map([[userId, entry]]);
+  return entry;
+}
+
+/** Call after changing a user's role or activation so it applies immediately. */
+export function bustRoleCache(userId?: string) {
+  if (userId) roleCache.delete(userId);
+  else roleCache.clear();
+}
+
 /** Which OAuth buttons to show on the auth pages (server-evaluated). */
 export async function getEnabledOAuth() {
   const creds = await getOAuthCreds();
@@ -145,6 +171,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => ({
       if (!user?.email) return true;
       const existing = await prisma.user.findUnique({ where: { email: user.email } });
       return !existing?.disabled;
+    },
+    // Overrides the static callback in auth.config.ts (kept there for the
+    // middleware bundle, which can't reach the database).
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id as string;
+        token.role = user.role ?? "USER";
+        return token;
+      }
+      const id = (token.id as string) ?? token.sub;
+      if (!id) return token;
+      const fresh = await getFreshRole(id);
+      if (!fresh || fresh.disabled) return null; // deleted/deactivated → end session
+      token.role = fresh.role;
+      return token;
     },
   },
 }));

@@ -69,7 +69,12 @@ export function ConnectionWizard() {
       setToken(res.token);
       setStep(2);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create device");
+      const message = err instanceof Error ? err.message : "Could not create device";
+      setError(
+        message === "Forbidden"
+          ? "Only administrators can add devices. Ask your admin to create this device for you."
+          : message,
+      );
     } finally {
       setCreating(false);
     }

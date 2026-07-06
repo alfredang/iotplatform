@@ -4,6 +4,7 @@ import { getViewAs, effectiveRole } from "@/lib/auth/view";
 import { listProjects, resolveProject } from "@/lib/projects";
 import { AppShell } from "@/components/layout/app-shell";
 import { ProjectProvider } from "@/components/project/project-context";
+import { RoleProvider } from "@/components/auth/role-context";
 
 export default async function DashboardLayout({
   children,
@@ -21,15 +22,17 @@ export default async function DashboardLayout({
   ]);
 
   return (
-    <ProjectProvider projects={projects} currentProjectId={current.id}>
-      <AppShell
-        user={{ name: session.user.name, email: session.user.email }}
-        realRole={role}
-        effectiveRole={effRole}
-        viewAs={viewAs}
-      >
-        {children}
-      </AppShell>
-    </ProjectProvider>
+    <RoleProvider role={effRole}>
+      <ProjectProvider projects={projects} currentProjectId={current.id}>
+        <AppShell
+          user={{ name: session.user.name, email: session.user.email }}
+          realRole={role}
+          effectiveRole={effRole}
+          viewAs={viewAs}
+        >
+          {children}
+        </AppShell>
+      </ProjectProvider>
+    </RoleProvider>
   );
 }

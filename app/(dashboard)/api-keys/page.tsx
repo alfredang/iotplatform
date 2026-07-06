@@ -4,6 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { KeyRound, Trash2 } from "lucide-react";
 import { apiFetch, fetcher } from "@/lib/client";
+import { useRole } from "@/components/auth/role-context";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ type Key = {
 };
 
 export default function ApiKeysPage() {
+  const { isAdmin } = useRole();
   const { data, isLoading, mutate } = useSWR<{ keys: Key[] }>("/api/api-keys", fetcher);
   const [showCreate, setShowCreate] = useState(false);
   const [created, setCreated] = useState<string | null>(null);
@@ -40,7 +42,11 @@ export default function ApiKeysPage() {
       <PageHeader
         title="API Keys"
         description="Account-level keys for submitting telemetry over HTTP."
-        action={<Button onClick={() => setShowCreate(true)}>Create API key</Button>}
+        action={
+          isAdmin ? (
+            <Button onClick={() => setShowCreate(true)}>Create API key</Button>
+          ) : undefined
+        }
       />
 
       <Card>
@@ -66,7 +72,11 @@ export default function ApiKeysPage() {
               <EmptyState
                 icon={<KeyRound className="h-8 w-8" />}
                 title="No API keys"
-                description="Create a key to start sending telemetry over HTTP."
+                description={
+                  isAdmin
+                    ? "Create a key to start sending telemetry over HTTP."
+                    : "Ask an administrator to create a key for sending telemetry over HTTP."
+                }
               />
             </div>
           ) : (
