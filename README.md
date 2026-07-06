@@ -74,7 +74,9 @@ log or call AI.
 - **Telemetry** — JSON ingestion over **HTTP** and **MQTT**, normalized into metrics.
 - **Real-time dashboard** — auto-refreshing summary cards + customizable widgets
   (number, line, bar, gauge, LED, device status, alert list, map + control widgets).
-- **Installable mobile app (PWA)** — add IoTFlow to your phone's home screen.
+- **Native iOS app** — [IoTFlow on the App Store](https://apps.apple.com/us/app/iotflow/id6781005693)
+  mirrors the web dashboard (display + control widgets); the web app is also an
+  installable PWA for any phone.
 - **Alerts** — threshold rules (`>`, `<`, `≥`, `≤`, `=`) and device-offline rules,
   with active/resolve workflow (and every alert can trigger an n8n flow).
 - **Projects** — each project is a self-contained workspace with its own devices,
@@ -111,7 +113,7 @@ log or call AI.
 | Realtime | SWR polling (5s) |
 | MQTT | Eclipse Mosquitto broker + a Node ingestion worker (`mqtt`); server-side publisher for downlink control |
 | Automation | n8n (webhook events out + REST callbacks in) |
-| Mobile | Installable PWA (web app manifest) |
+| Mobile | Native iOS app ([App Store](https://apps.apple.com/us/app/iotflow/id6781005693)) · Installable PWA (web app manifest) |
 | Email | Nodemailer (SMTP) |
 | Deploy | Docker · Docker Compose · Coolify |
 

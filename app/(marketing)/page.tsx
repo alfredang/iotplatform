@@ -549,7 +549,7 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-border bg-surface/50">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-7">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-8">
           {/* Brand */}
           <div className="col-span-2">
             <Logo href="/" size="sm" />
@@ -630,7 +630,7 @@ export default async function LandingPage() {
           </div>
 
           {/* Get the app */}
-          <div>
+          <div className="col-span-2">
             <h3 className="text-sm font-semibold text-foreground">Get the app</h3>
             <p className="mt-4 text-sm text-muted">Monitor &amp; control your devices on the go.</p>
             <AppStoreBadge className="mt-3" />
