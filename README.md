@@ -71,8 +71,8 @@ log or call AI.
   copy-paste **uplink + control** code for ESP32, Arduino, Raspberry Pi, generic
   **C++** (Paho), **Python** (paho/requests), MQTT clients and cURL.
 - **Device SDKs** — optional thin clients in [`clients/`](clients/): an Arduino/ESP
-  library (`virtualWrite()` + a `BLYNK_WRITE`-style callback) and a single-file,
-  zero-install Python client (`clients/python/iotflow.py`).
+  library (`virtualWrite()` + a `BLYNK_WRITE`-style callback) and a pip-installable
+  Python client (`pip install iotflow`, also usable as a single zero-install file).
 - **Telemetry** — JSON ingestion over **HTTP** and **MQTT**, normalized into metrics.
 - **Real-time dashboard** — auto-refreshing summary cards + customizable widgets
   (number, line, bar, gauge, LED, device status, alert list, map + control widgets).
@@ -167,7 +167,7 @@ iotplatform/
 │                           # blog, admin, marketing, charts, maps, auth, ui
 ├── lib/                    # auth, db, app-config, mqtt (topics + publish), telemetry, alerts,
 │                           # commands, automations (dispatch), n8n, blog, markdown, validation, tokens
-├── clients/                # device SDKs — arduino/IoTFlow (library), python/iotflow.py
+├── clients/                # device SDKs — arduino/IoTFlow (library), python (pip package "iotflow")
 ├── prisma/                 # schema.prisma, seed.ts, demo-projects.ts, blog-seed.ts, migrations
 ├── scripts/                # gmail-oauth.mjs (one-time Gmail refresh-token helper)
 ├── worker/                 # mqtt-ingest.ts (long-running ingestion worker)

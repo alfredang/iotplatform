@@ -18,8 +18,8 @@ export default function IntegratePage() {
   -H "Content-Type: application/json" \\
   -d '{"temperature": 22.5, "humidity": 60}'`;
 
-  const python = `# 1) download the one file (no pip needed for HTTP):
-#    curl -O https://raw.githubusercontent.com/alfredang/iotplatform/main/clients/python/iotflow.py
+  const python = `# 1) install the package:  pip install iotflow
+#    (or zero-install: curl -O https://raw.githubusercontent.com/alfredang/iotplatform/main/clients/python/iotflow.py)
 from iotflow import IoTFlow
 
 iot = IoTFlow("${appUrl}", "dev_YOUR_DEVICE_TOKEN", "your-device-id")
@@ -30,6 +30,24 @@ def handle(pin, value, text):
     if pin == "pump":
         print("pump ->", value)
 iot.run(interval=3)`;
+
+  const pythonMqtt = `# pip install "iotflow[mqtt]"
+import time
+from iotflow import IoTFlow
+
+iot = IoTFlow(token="dev_YOUR_DEVICE_TOKEN", device_id="your-device-id",
+              mqtt_host="${mqttHostOnly}", mqtt_port=${mqttPort || "1883"})
+
+@iot.on_command                                 # dashboard / n8n control, real time
+def handle(pin, value, text):
+    if pin == "relay":
+        print("relay ->", value)                # drive a GPIO here
+
+iot.connect()                                   # MQTT runs in the background
+
+while True:                                     # publish telemetry every 10 s
+    iot.mqtt_publish(temperature=28.5, humidity=65, voltage=3.7)
+    time.sleep(10)`;
 
   const esp32 = `#include <WiFi.h>
 #include <PubSubClient.h>
@@ -80,7 +98,8 @@ void loop() {
       <div className="space-y-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold"><Terminal className="h-5 w-5 text-primary" /> Quickstart (copy &amp; paste)</h2>
         <Guide title="Any device — HTTP (cURL)" code={curl} note="Send JSON to the REST endpoint with your device token. Works from any language or shell." />
-        <Guide title="Raspberry Pi / PC — Python (one file, no install)" code={python} note="HTTP mode uses only the Python standard library." />
+        <Guide title="Raspberry Pi / PC — Python (HTTP)" code={python} note="pip install iotflow — HTTP mode uses only the Python standard library, so the single-file drop-in works too." />
+        <Guide title="Raspberry Pi / PC — Python (MQTT, two-way)" code={pythonMqtt} note="Python twin of the ESP8266 telemetry-upload sketch: publishes readings every 10 s and reacts to control pins in real time." />
         <Guide title="ESP32 / ESP8266 — Arduino (MQTT, two-way)" code={esp32} note="Uses the optional IoTFlow library for a clean API. The wizard can also emit a plain PubSubClient sketch with no library." />
       </div>
 
@@ -100,6 +119,8 @@ void loop() {
             <Plug className="mt-0.5 h-4 w-4 text-muted" />
             <div>
               <p className="font-medium">Python (Raspberry Pi)</p>
+              <CodeBlock code={`pip install "iotflow[mqtt]"`} />
+              <p className="text-muted">Or zero-install — download the single file (HTTP mode needs no dependencies):</p>
               <CodeBlock code={`curl -O https://raw.githubusercontent.com/alfredang/iotplatform/main/clients/python/iotflow.py`} />
               <a className="text-primary hover:underline" href={`${REPO}/tree/main/clients/python`} target="_blank" rel="noopener noreferrer">View the Python client →</a>
             </div>

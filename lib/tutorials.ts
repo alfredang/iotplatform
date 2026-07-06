@@ -1,4 +1,4 @@
-import { Cpu, Radio, Gauge, SlidersHorizontal, Workflow, type LucideIcon } from "lucide-react";
+import { Cpu, Radio, Gauge, SlidersHorizontal, Workflow, UploadCloud, type LucideIcon } from "lucide-react";
 
 export type TutStep = {
   title: string;
@@ -71,11 +71,27 @@ export const TUTORIALS: Tutorial[] = [
   -d '{"temperature": 22.5, "humidity": 60}'`,
       },
       {
-        title: "Or use the one-file Python client",
-        body: "On a Raspberry Pi or PC, download iotflow.py (no pip install needed for HTTP) and send readings in two lines.",
-        code: `from iotflow import IoTFlow
+        title: "Or use the Python package (Raspberry Pi / PC)",
+        body: "Install the iotflow package from PyPI and send readings in two lines. HTTP mode has zero dependencies — you can also just download iotflow.py next to your script instead of installing.",
+        code: `# pip install iotflow
+from iotflow import IoTFlow
 iot = IoTFlow("https://YOUR-HOST", "dev_YOUR_DEVICE_TOKEN", "your-device-id")
 iot.send(temperature=22.5, humidity=60)`,
+      },
+      {
+        title: "Or Python over MQTT — publish every 10 seconds",
+        body: "The Python twin of the ESP8266 telemetry-upload sketch: connect once in the background, then publish readings on a loop. Install with the mqtt extra.",
+        code: `# pip install "iotflow[mqtt]"
+import time
+from iotflow import IoTFlow
+
+iot = IoTFlow(token="dev_YOUR_DEVICE_TOKEN", device_id="your-device-id",
+              mqtt_host="BROKER_HOST", mqtt_port=1883)
+iot.connect()                          # MQTT runs in the background
+
+while True:
+    iot.mqtt_publish(temperature=28.5, humidity=65, voltage=3.7)
+    time.sleep(10)`,
       },
       {
         title: "Or ESP32 / ESP8266 over MQTT",
@@ -147,6 +163,22 @@ iot.virtualWrite("temperature", 22.5);`,
 }`,
       },
       {
+        title: "Python devices react the same way",
+        body: "With the iotflow package, register a command handler and run — over MQTT it fires in real time; over plain HTTP, iot.run() polls for you.",
+        code: `# pip install "iotflow[mqtt]"
+from iotflow import IoTFlow
+
+iot = IoTFlow(token="dev_YOUR_DEVICE_TOKEN", device_id="your-device-id",
+              mqtt_host="BROKER_HOST", mqtt_port=1883)
+
+@iot.on_command
+def handle(pin, value, text):
+    if pin == "relay":
+        print("relay ->", value)   # drive a GPIO here
+
+iot.loop_forever()`,
+      },
+      {
         title: "Toggle from the dashboard",
         body: "Flip the Switch or drag the Slider — the command is persisted and delivered to your device instantly (and it also fires a COMMAND automation you can hook into n8n).",
         image: "/tutorials/t4-control.png",
@@ -181,6 +213,70 @@ iot.virtualWrite("temperature", 22.5);`,
         body: "Click Test on the automation card to send a sample event — you’ll see the delivery status and n8n will run the flow. After that, real device events trigger it automatically. n8n flows can call back to control devices, notify Slack/Email/WhatsApp, log to Sheets, or run AI.",
         image: "/tutorials/t5-automations.png",
         caption: "The Automations page with live n8n connection and delivery status.",
+      },
+    ],
+  },
+  {
+    slug: "esp8266-telemetry-upload",
+    num: 6,
+    icon: UploadCloud,
+    title: "Upload telemetry every 10 seconds (ESP8266 & Python)",
+    time: "10 min",
+    summary:
+      "Publish temperature, humidity and voltage to the platform over MQTT on a fixed interval — from an ESP8266 sketch or the same loop in Python.",
+    steps: [
+      {
+        title: "What you'll build",
+        body: "A device that connects to WiFi and your MQTT broker, then publishes a JSON reading to devices/<id>/telemetry every 10 seconds. This mirrors the ESP8266_Telemetry_Upload example that ships with the Arduino library — and the identical loop with the iotflow Python package.",
+        code: `{"token":"dev_…","temperature":28.5,"humidity":65,"voltage":3.7}
+→ published to  devices/<DEVICE_ID>/telemetry  every 10 s`,
+      },
+      {
+        title: "Create the device and copy its token",
+        body: "Run the Add Device wizard (see Tutorial 1) and choose MQTT. Note the device id and the dev_… token — the token rides inside every telemetry message to authenticate it.",
+      },
+      {
+        title: "Find your broker address",
+        body: "Use the LAN IP of the machine running the Mosquitto broker — not “localhost”, because the ESP8266 is a separate device on your network. Find it with ipconfig (Windows) or ifconfig (macOS/Linux). Port is 1883 by default.",
+      },
+      {
+        title: "ESP8266 — flash the sketch",
+        body: "Install the PubSubClient library (Library Manager), fill in your WiFi, broker IP, device id and token, and flash. The full sketch is clients/arduino/IoTFlow/examples/ESP8266_Telemetry_Upload on GitHub; this is the heart of it.",
+        code: `const char* MQTT_BROKER  = "192.168.1.50";   // your broker's LAN IP
+const char* DEVICE_ID    = "your-device-id";
+const char* DEVICE_TOKEN = "dev_YOUR_DEVICE_TOKEN";
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) connectWiFi();
+  if (!mqttClient.connected()) connectMQTT();
+  mqttClient.loop();
+
+  if (millis() - lastPublish >= 10000) {
+    lastPublish = millis();
+    // TODO: replace with real sensor readings
+    publishTelemetry(28.5, 65, 3.7);   // temperature, humidity, voltage
+  }
+}`,
+      },
+      {
+        title: "Raspberry Pi / PC — the same thing in Python",
+        body: "No ESP8266 handy? The iotflow package does the identical job on anything that runs Python. Install it, fill in the same broker/id/token, and run.",
+        code: `# pip install "iotflow[mqtt]"
+import time
+from iotflow import IoTFlow
+
+iot = IoTFlow(token="dev_YOUR_DEVICE_TOKEN", device_id="your-device-id",
+              mqtt_host="192.168.1.50", mqtt_port=1883)
+iot.connect()                          # MQTT runs in the background
+
+while True:
+    # TODO: replace with real sensor readings
+    iot.mqtt_publish(temperature=28.5, humidity=65, voltage=3.7)
+    time.sleep(10)`,
+      },
+      {
+        title: "Watch it arrive, then visualise it",
+        body: "Open the Dashboard — a new reading lands under Latest Telemetry every 10 seconds. Bind Number, Gauge or Line-chart widgets to the temperature, humidity and voltage metrics (see Tutorial 3) and you have a live sensor feed.",
       },
     ],
   },

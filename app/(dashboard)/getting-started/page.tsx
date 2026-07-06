@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  Rocket, Cpu, LayoutDashboard, SlidersHorizontal, Workflow,
+  Rocket, Cpu, LayoutDashboard, SlidersHorizontal, Workflow, UploadCloud,
   CheckCircle2, ArrowRight, type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/misc";
@@ -84,6 +84,20 @@ const TUTORIALS: Tutorial[] = [
     ],
     cta: { label: "Create an automation", href: "/automations" },
   },
+  {
+    icon: UploadCloud,
+    title: "6 · Upload telemetry every 10 seconds (ESP8266 & Python)",
+    time: "10 min",
+    intro: "Publish temperature, humidity and voltage over MQTT on a fixed interval — from an ESP8266 sketch or the iotflow Python package.",
+    steps: [
+      "Create an MQTT device and copy its id + dev_… token.",
+      "Find your broker's LAN IP (not localhost — the board is a separate device on the network).",
+      "ESP8266: flash the ESP8266_Telemetry_Upload example from the Arduino library.",
+      "Raspberry Pi / PC: pip install \"iotflow[mqtt]\", then iot.connect() and mqtt_publish(...) every 10 s.",
+      "Bind Number / Gauge / Line widgets to temperature, humidity and voltage.",
+    ],
+    cta: { label: "Read the full tutorial", href: "/tutorials/esp8266-telemetry-upload" },
+  },
 ];
 
 export default function GettingStartedPage() {
@@ -91,7 +105,7 @@ export default function GettingStartedPage() {
     <div className="space-y-8">
       <PageHeader
         title="Getting started"
-        description="Five short tutorials to go from zero to a live, automated IoT dashboard."
+        description="Six short tutorials to go from zero to a live, automated IoT dashboard."
       />
 
       <div className="space-y-5">

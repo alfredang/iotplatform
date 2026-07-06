@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iotflow"
+version = "0.1.0"
+description = "Python client for the IoTFlow IoT platform — telemetry uplink and two-way device control over HTTP or MQTT (Raspberry Pi, PC, any device that runs Python)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Tertiary Infotech", email = "angch@tertiaryinfotech.com" },
+]
+keywords = ["iot", "mqtt", "telemetry", "raspberry-pi", "esp32", "esp8266", "arduino", "iotflow"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Home Automation",
+    "Topic :: System :: Hardware",
+]
+
+[project.optional-dependencies]
+mqtt = ["paho-mqtt>=1.6"]
+
+[project.urls]
+Homepage = "https://github.com/alfredang/iotplatform"
+Documentation = "https://github.com/alfredang/iotplatform/tree/main/clients/python"
+Source = "https://github.com/alfredang/iotplatform"
+
+[tool.setuptools]
+py-modules = ["iotflow"]

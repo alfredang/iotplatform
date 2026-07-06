@@ -1,9 +1,9 @@
 """
-IoTFlow — single-file Python client for the IoTFlow IoT platform.
+IoTFlow — Python client for the IoTFlow IoT platform.
 
-Zero-install: just drop this file next to your script (Raspberry Pi, PC, etc.).
-HTTP mode uses only the Python standard library — no pip install needed.
-MQTT mode is optional and only requires `paho-mqtt` if you use it.
+Install from PyPI (`pip install iotflow` — add `[mqtt]` for MQTT mode) or just
+drop this file next to your script (Raspberry Pi, PC, etc.): HTTP mode uses
+only the Python standard library, MQTT mode only needs `paho-mqtt`.
 
 Quick start (HTTP — works out of the box):
 
@@ -28,6 +28,15 @@ Real-time control over MQTT (optional, needs `pip install paho-mqtt`):
     @iot.on_command
     def handle(pin, value, text): ...
     iot.loop_forever()
+
+Periodic telemetry over MQTT (non-blocking connection):
+
+    iot = IoTFlow(token="dev_XXXX", device_id="rpi-weather",
+                  mqtt_host="broker.host")
+    iot.connect()                                   # MQTT in the background
+    while True:
+        iot.mqtt_publish(temperature=22.5)
+        time.sleep(10)
 """
 from __future__ import annotations
 
@@ -36,6 +45,8 @@ import time
 import urllib.request
 import urllib.error
 from typing import Callable, Dict, Optional
+
+__version__ = "0.1.0"
 
 CommandHandler = Callable[[str, float, Optional[str]], None]
 
@@ -94,12 +105,39 @@ class IoTFlow:
             time.sleep(interval)
 
     # ---- real-time (MQTT, optional) ----
+    def connect(self) -> None:
+        """Connect over MQTT in the background (non-blocking).
+
+        After this, `mqtt_publish(...)` sends telemetry and any registered
+        command handler fires on downlink messages.
+        """
+        self._mqtt_connect().loop_start()
+
     def loop_forever(self) -> None:
-        """Connect over MQTT: publish telemetry + receive commands in real time."""
+        """Connect over MQTT and block: receive commands in real time."""
+        self._mqtt_connect().loop_forever()
+
+    def disconnect(self) -> None:
+        """Disconnect from the MQTT broker."""
+        if self._mqtt:
+            client, _ = self._mqtt
+            client.loop_stop()
+            client.disconnect()
+            self._mqtt = None
+
+    def mqtt_publish(self, **readings) -> None:
+        """Publish readings over MQTT (call connect() or loop_forever() first)."""
+        if not self._mqtt:
+            raise RuntimeError("MQTT not connected; call connect() first")
+        client, up = self._mqtt
+        client.publish(up, json.dumps({"token": self.token, **readings}))
+
+    def _mqtt_connect(self):
         try:
             import paho.mqtt.client as mqtt  # type: ignore
         except ImportError as e:  # pragma: no cover
-            raise RuntimeError("MQTT mode needs paho-mqtt: pip install paho-mqtt") from e
+            raise RuntimeError(
+                "MQTT mode needs paho-mqtt: pip install iotflow[mqtt]") from e
         if not self.mqtt_host:
             raise RuntimeError("Set mqtt_host=... to use MQTT mode")
 
@@ -116,21 +154,17 @@ class IoTFlow:
             except Exception:
                 pass
 
-        client = mqtt.Client()
+        try:  # paho-mqtt >= 2.0
+            client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)  # type: ignore[attr-defined]
+        except AttributeError:  # paho-mqtt 1.x
+            client = mqtt.Client()
         if self.mqtt_username:
             client.username_pw_set(self.mqtt_username, self.mqtt_password)
         client.on_connect = on_connect
         client.on_message = on_message
         client.connect(self.mqtt_host, self.mqtt_port, 60)
         self._mqtt = (client, up)
-        client.loop_forever()
-
-    def mqtt_publish(self, **readings) -> None:
-        """Publish a reading over MQTT (call after loop_start / inside handlers)."""
-        if not self._mqtt:
-            raise RuntimeError("MQTT not connected; call loop_forever() first")
-        client, up = self._mqtt
-        client.publish(up, json.dumps({"token": self.token, **readings}))
+        return client
 
     # ---- internals ----
     def _dispatch(self, pin: str, value, text: Optional[str] = None) -> None:

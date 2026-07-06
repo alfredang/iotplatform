@@ -19,8 +19,12 @@ Install: Arduino IDE → *Sketch → Include Library → Add .ZIP Library…* (a
 install **PubSubClient**). Or copy `src/IoTFlow.h` + `src/IoTFlow.cpp` next to
 your sketch. See its [README](arduino/IoTFlow/README.md).
 
-### Python / Raspberry Pi — [`clients/python/iotflow.py`](python/iotflow.py)
-**Zero install:** download the single file and drop it next to your script —
+### Python / Raspberry Pi — [`clients/python`](python/)
+Install from PyPI (add `[mqtt]` for real-time MQTT):
+```bash
+pip install "iotflow[mqtt]"
+```
+Or zero install: download the single file and drop it next to your script —
 HTTP mode uses only the Python standard library.
 ```bash
 curl -O https://raw.githubusercontent.com/alfredang/iotplatform/main/clients/python/iotflow.py
@@ -30,8 +34,9 @@ from iotflow import IoTFlow
 iot = IoTFlow("https://iot.tertiaryinfotech.com", "dev_XXXX", "rpi-weather")
 iot.send(temperature=22.5, humidity=60)
 ```
-Real-time control over MQTT is optional (`pip install paho-mqtt`). See the
-[Python README](python/README.md).
+See the [Python README](python/README.md) and
+[examples/telemetry_upload.py](python/examples/telemetry_upload.py) (the
+Python twin of the `ESP8266_Telemetry_Upload` Arduino example).
 
 ## Conventions (what the libraries wrap)
 

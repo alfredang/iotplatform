@@ -29,6 +29,7 @@ import {
   Phone,
   Mail,
   MessageCircle,
+  UploadCloud,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -145,6 +146,18 @@ const TUTORIALS = [
       "Create an Automation for an event.",
       "Paste the webhook URL and save.",
       "Test it, then let devices trigger it.",
+    ],
+  },
+  {
+    slug: "esp8266-telemetry-upload",
+    icon: UploadCloud,
+    title: "Upload telemetry every 10 s",
+    time: "10 min",
+    steps: [
+      "Create an MQTT device; copy id + token.",
+      "ESP8266: flash the Telemetry_Upload sketch.",
+      "Or Python: pip install \"iotflow[mqtt]\".",
+      "Publish every 10 s; watch it live.",
     ],
   },
 ];
@@ -346,7 +359,7 @@ export default async function LandingPage() {
       <section id="tutorials" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Get started in 5 short tutorials
+            Get started in 6 short tutorials
           </h2>
           <p className="mt-3 text-muted">
             From zero to a live, automated IoT dashboard — no heavy code required.
