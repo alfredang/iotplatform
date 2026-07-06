@@ -47,6 +47,13 @@ next-env.d.ts
 # playwright mcp artifacts
 .playwright-mcp
 
+# local MCP server config (may contain machine-specific paths/secrets)
+/.mcp.json
+/.cursor/mcp.json
+
+# lockfile not tracked in this repo
+/package-lock.json
+
 # installed third-party Claude skills — vendored content is reproducible from
 # skills-lock.json (npx skills add), so we don't commit the 2MB+ of packages.
 /.agents/

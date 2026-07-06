@@ -9,7 +9,6 @@
  * Run with: npm run worker   (tsx worker/mqtt-ingest.ts)
  */
 import mqtt from "mqtt";
-import { prisma } from "@/lib/db/prisma";
 import {
   ingestForDevice,
   resolveDeviceToken,
@@ -45,16 +44,13 @@ async function handleMessage(topic: string, raw: Buffer) {
   // Strip auth/meta fields before treating the rest as telemetry.
   const { token: _t, ...payload } = parsed;
 
-  let device = null;
-  if (token) {
-    device = await resolveDeviceToken(token);
+  if (!token) {
+    log(`missing token on ${topic}`);
+    return;
   }
+  const device = await resolveDeviceToken(token);
   if (!device) {
-    // Fall back to resolving by public id (assumes broker-level auth).
-    device = await prisma.device.findUnique({ where: { deviceId: publicDeviceId } });
-  }
-  if (!device) {
-    log(`unknown/unauthenticated device for topic ${topic}`);
+    log(`invalid token on ${topic}`);
     return;
   }
   if (device.deviceId !== publicDeviceId) {
