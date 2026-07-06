@@ -20,7 +20,7 @@ const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 // ---- MQTT broker ----
 // Use your machine's LAN IP (not "localhost" — the ESP8266 is a separate
 // device on the network). Find it with `ipconfig` (look for IPv4 Address).
-const char* MQTT_BROKER = "192.168.3.228";
+const char* MQTT_BROKER = "192.168.1.50";
 const uint16_t MQTT_PORT = 1883;
 
 // ---- Device identity (must match the deviceId set in the dashboard) ----

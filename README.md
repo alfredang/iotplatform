@@ -174,7 +174,8 @@ iotplatform/
 ├── mosquitto/              # mosquitto.conf
 ├── docs/                   # connecting-a-device.md, n8n-integration.md, mobile-apps-parity-plan.md
 ├── Dockerfile
-└── docker-compose.yml
+└── docker-compose.yml      # full stack (+ docker-compose.mqtt.yml / docker-compose.worker.yml
+                            #   to run just the broker or just the ingestion worker)
 ```
 
 ---

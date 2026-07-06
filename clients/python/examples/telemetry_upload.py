@@ -19,7 +19,7 @@ from iotflow import IoTFlow
 # ---- MQTT broker ----
 # Use the broker machine's LAN IP (not "localhost" unless the broker runs on
 # this same device). Find it with `ipconfig` / `ifconfig`.
-MQTT_BROKER = "192.168.3.228"
+MQTT_BROKER = "192.168.1.50"
 MQTT_PORT = 1883
 
 # ---- Device identity (from the "Add Device" wizard in IoTFlow) ----

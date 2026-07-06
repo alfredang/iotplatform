@@ -11,7 +11,7 @@ pip install iotflow            # HTTP only (zero dependencies)
 pip install "iotflow[mqtt]"    # + real-time MQTT (paho-mqtt)
 ```
 
-Straight from GitHub (before/without a PyPI release):
+Or straight from GitHub:
 
 ```bash
 pip install "iotflow[mqtt] @ git+https://github.com/alfredang/iotplatform.git#subdirectory=clients/python"
@@ -44,7 +44,7 @@ import time
 from iotflow import IoTFlow
 
 iot = IoTFlow(token="dev_XXXX", device_id="test-device",
-              mqtt_host="192.168.3.228", mqtt_port=1883)
+              mqtt_host="192.168.1.50", mqtt_port=1883)
 iot.connect()                               # MQTT runs in the background
 
 while True:
