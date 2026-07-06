@@ -286,6 +286,54 @@ mosquitto_pub -h localhost -p 1883 \
 
 See [docs/connecting-a-device.md](docs/connecting-a-device.md) for ESP32/Arduino/Pi examples.
 
+### Python package (`iotflow`)
+
+For anything that runs Python (Raspberry Pi, PC/Mac, Linux SBCs) there's a
+pip-installable client that speaks the same uplink + control protocol as the
+Arduino library:
+
+```bash
+pip install iotflow            # HTTP only — zero dependencies
+pip install "iotflow[mqtt]"    # + real-time MQTT (paho-mqtt)
+```
+
+HTTP mode uses only the standard library, so you can also skip pip entirely and
+drop [`clients/python/iotflow.py`](clients/python/iotflow.py) next to your script.
+
+**Send telemetry (HTTP):**
+
+```python
+from iotflow import IoTFlow
+
+iot = IoTFlow("https://your-host", "dev_XXXX", "rpi-weather")
+iot.send(temperature=22.5, humidity=60)     # several metrics at once
+iot.virtual_write("temperature", 22.5)      # or one pin at a time
+```
+
+**Send telemetry (MQTT):**
+
+```python
+iot = IoTFlow(token="dev_XXXX", device_id="rpi-weather",
+              mqtt_host="your-broker", mqtt_port=1883)
+iot.connect()                               # MQTT runs in the background
+iot.mqtt_publish(temperature=28.5, humidity=65)
+```
+
+**React to dashboard/n8n control commands** (Blynk `BLYNK_WRITE`-style):
+
+```python
+@iot.on_command
+def handle(pin, value, text):
+    if pin == "pump":
+        print("pump ->", value)             # drive a GPIO here
+
+iot.run(interval=3)      # HTTP: blocks and polls /api/device/state every 3s
+# ...or iot.loop_forever() when constructed with mqtt_host for real-time push
+```
+
+Full guide (install options, examples, PyPI publishing):
+[clients/python/README.md](clients/python/README.md).
+
 ### Controlling a device (downlink)
 
 Write a virtual pin from a dashboard widget, the API, or an n8n flow:
