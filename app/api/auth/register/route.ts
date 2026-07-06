@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
+import { createOtp } from "@/lib/otp";
 import { registerSchema } from "@/lib/validation";
 import { handleApiError, parseBody } from "@/lib/api";
 
@@ -27,7 +28,11 @@ export async function POST(req: Request) {
       },
     });
 
-    return Response.json({ ok: true }, { status: 201 });
+    // The account stays unverified (cannot sign in with a password) until the
+    // emailed code is confirmed via /api/auth/verify-email.
+    const { devCode } = await createOtp(email, "verify");
+
+    return Response.json({ ok: true, requiresVerification: true, devCode }, { status: 201 });
   } catch (err) {
     return handleApiError(err);
   }

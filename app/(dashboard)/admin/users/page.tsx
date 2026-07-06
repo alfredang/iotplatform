@@ -10,7 +10,7 @@ export default async function AdminUsersPage() {
     <div>
       <PageHeader
         title="Users"
-        description="View all users, change roles, deactivate or remove accounts."
+        description="View all user and admin accounts — create, edit, deactivate or remove them."
       />
       <AdminUsers currentUserId={session.user.id} />
     </div>

@@ -1,4 +1,4 @@
-import NextAuth, { type NextAuthConfig } from "next-auth";
+import NextAuth, { CredentialsSignin, type NextAuthConfig } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -7,6 +7,11 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
 import { verifyOtp } from "@/lib/otp";
 import { authConfig } from "./auth.config";
+
+/** Surfaced to the login form so it can offer to resend the verification code. */
+class EmailNotVerified extends CredentialsSignin {
+  code = "email_not_verified";
+}
 
 // Build the provider list dynamically. OAuth providers are only registered
 // when their credentials are present, so the app boots cleanly without them.
@@ -28,6 +33,9 @@ const providers: NextAuthConfig["providers"] = [
 
       const ok = await bcrypt.compare(password, user.hashedPassword);
       if (!ok) return null;
+
+      // Registered but never confirmed the emailed code.
+      if (!user.emailVerified) throw new EmailNotVerified();
 
       return { id: user.id, email: user.email, name: user.name, role: user.role };
     },

@@ -17,6 +17,10 @@ type Config = {
   alertEmail: string;
   emailAlertsEnabled: boolean;
   hasPassword: boolean;
+  gmailUser: string;
+  gmailClientId: string;
+  hasGmailClientSecret: boolean;
+  hasGmailRefreshToken: boolean;
   n8nBaseUrl: string;
   hasN8nApiKey: boolean;
   mqttBrokerUrl: string;
@@ -25,7 +29,13 @@ type Config = {
   hasMqttPassword: boolean;
 };
 
-type FormExtra = { smtpPassword?: string; n8nApiKey?: string; mqttPassword?: string };
+type FormExtra = {
+  smtpPassword?: string;
+  gmailClientSecret?: string;
+  gmailRefreshToken?: string;
+  n8nApiKey?: string;
+  mqttPassword?: string;
+};
 
 export function EmailSettings() {
   const { data, isLoading, mutate } = useSWR<{ config: Config }>("/api/admin/config", fetcher);
@@ -33,6 +43,8 @@ export function EmailSettings() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState("");
 
   const cfg = data?.config;
   // Controlled values fall back to the loaded config.
@@ -51,7 +63,14 @@ export function EmailSettings() {
     setSaved(false);
     try {
       await apiFetch("/api/admin/config", { method: "PUT", body: JSON.stringify(form) });
-      setForm((f) => ({ ...f, smtpPassword: "", n8nApiKey: "", mqttPassword: "" }));
+      setForm((f) => ({
+        ...f,
+        smtpPassword: "",
+        gmailClientSecret: "",
+        gmailRefreshToken: "",
+        n8nApiKey: "",
+        mqttPassword: "",
+      }));
       setSaved(true);
       mutate();
       setTimeout(() => setSaved(false), 2500);
@@ -59,6 +78,27 @@ export function EmailSettings() {
       setError(err instanceof Error ? err.message : "Could not save");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function sendTest() {
+    setTesting(true);
+    setTestResult("");
+    setError("");
+    try {
+      const res = await apiFetch<{ delivered: boolean; to: string }>(
+        "/api/admin/config/test-email",
+        { method: "POST", body: JSON.stringify({}) },
+      );
+      setTestResult(
+        res.delivered
+          ? `Test email sent to ${res.to}`
+          : "No email transport configured — message was logged to the server console",
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Test email failed");
+    } finally {
+      setTesting(false);
     }
   }
 
@@ -104,6 +144,46 @@ export function EmailSettings() {
               placeholder="alerts@acme.io"
             />
           </Field>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Gmail (OAuth2)</CardTitle>
+          {cfg.hasGmailRefreshToken && <Badge tone="success">Connected</Badge>}
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <p className="text-sm text-muted">
+            Send email through a Gmail account using Google OAuth2 — used for
+            verification codes, one-time login codes, password resets and
+            alerts. Takes precedence over SMTP when fully configured. Get a
+            refresh token with{" "}
+            <code className="rounded bg-surface-2 px-1">node scripts/gmail-oauth.mjs</code>.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Gmail address">
+              <Input value={val("gmailUser") || ""} onChange={set("gmailUser")} placeholder="you@gmail.com" />
+            </Field>
+            <Field label="Client ID">
+              <Input value={val("gmailClientId") || ""} onChange={set("gmailClientId")} placeholder="xxxx.apps.googleusercontent.com" />
+            </Field>
+            <Field label="Client secret" hint={cfg.hasGmailClientSecret ? "Leave blank to keep current." : undefined}>
+              <Input
+                type="password"
+                value={form.gmailClientSecret ?? ""}
+                onChange={set("gmailClientSecret")}
+                placeholder="••••••••"
+              />
+            </Field>
+            <Field label="Refresh token" hint={cfg.hasGmailRefreshToken ? "Leave blank to keep current." : undefined}>
+              <Input
+                type="password"
+                value={form.gmailRefreshToken ?? ""}
+                onChange={set("gmailRefreshToken")}
+                placeholder="••••••••"
+              />
+            </Field>
+          </div>
         </CardBody>
       </Card>
 
@@ -187,11 +267,15 @@ export function EmailSettings() {
         </CardBody>
       </Card>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={saving}>
           {saving && <Spinner />} Save settings
         </Button>
+        <Button type="button" variant="outline" onClick={sendTest} disabled={testing}>
+          {testing && <Spinner />} Send test email
+        </Button>
         {saved && <span className="text-sm text-success">Saved!</span>}
+        {testResult && <span className="text-sm text-success">{testResult}</span>}
         {error && <span className="text-sm text-danger">{error}</span>}
       </div>
     </form>

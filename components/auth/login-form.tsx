@@ -13,6 +13,7 @@ export function LoginForm({ google, github }: { google: boolean; github: boolean
   const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl") || "/dashboard";
+  const justVerified = params.get("verified") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,6 +30,10 @@ export function LoginForm({ google, github }: { google: boolean; github: boolean
     });
     setLoading(false);
     if (res?.error) {
+      if (res.code === "email_not_verified") {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
       setError("Invalid email or password");
       return;
     }
@@ -40,6 +45,12 @@ export function LoginForm({ google, github }: { google: boolean; github: boolean
     <div className="rounded-card border border-border bg-surface p-6 shadow-sm">
       <h1 className="text-xl font-semibold">Welcome back</h1>
       <p className="mt-1 text-sm text-muted">Sign in to your IoT dashboard.</p>
+
+      {justVerified && (
+        <p className="mt-4 rounded-lg bg-success/15 p-3 text-center text-sm text-success">
+          Email verified — you can sign in now.
+        </p>
+      )}
 
       <div className="mt-6">
         <SocialButtons google={google} github={github} callbackUrl={callbackUrl} />

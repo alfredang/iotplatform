@@ -8,9 +8,26 @@ export const registerSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").max(200),
 });
 
+export const adminUserCreateSchema = registerSchema.extend({
+  role: z.enum(["ADMIN", "USER"]).default("USER"),
+});
+
+export const adminUserUpdateSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(120).optional(),
+  email: email.optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").max(200).optional(),
+  role: z.enum(["ADMIN", "USER"]).optional(),
+  disabled: z.boolean().optional(),
+});
+
 export const otpRequestSchema = z.object({
   email,
-  purpose: z.enum(["login", "reset"]).default("login"),
+  purpose: z.enum(["login", "reset", "verify"]).default("login"),
+});
+
+export const verifyEmailSchema = z.object({
+  email,
+  code: z.string().trim().length(6, "Enter the 6-digit code"),
 });
 
 export const otpResetSchema = z.object({

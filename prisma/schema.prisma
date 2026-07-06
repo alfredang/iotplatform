@@ -403,6 +403,13 @@ model AppConfig {
   smtpFrom           String?
   alertEmail         String? // default recipient for alert notifications
   emailAlertsEnabled Boolean  @default(false)
+  // Gmail OAuth2 sending — takes precedence over SMTP when fully configured
+  // (falls back to GMAIL_USER / GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET /
+  // GMAIL_REFRESH_TOKEN env vars)
+  gmailUser          String?
+  gmailClientId      String?
+  gmailClientSecret  String?
+  gmailRefreshToken  String?
   // n8n integration (falls back to N8N_BASE_URL / N8N_API_KEY env vars)
   n8nBaseUrl         String?
   n8nApiKey          String?

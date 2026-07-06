@@ -1,15 +1,17 @@
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
 import { requireAdminApi, AuthError } from "@/lib/auth/rbac";
-import { handleApiError } from "@/lib/api";
+import { handleApiError, parseBody } from "@/lib/api";
+import { adminUserUpdateSchema } from "@/lib/validation";
 
 type Ctx = { params: Promise<{ id: string }> };
 
-/** PATCH /api/admin/users/:id — change role and/or activation (admin only). */
+/** PATCH /api/admin/users/:id — edit profile, credentials, role or activation (admin only). */
 export async function PATCH(req: Request, { params }: Ctx) {
   try {
     const admin = await requireAdminApi();
     const { id } = await params;
-    const body = (await req.json()) as { role?: "ADMIN" | "USER"; disabled?: boolean };
+    const body = await parseBody(req, adminUserUpdateSchema);
 
     const target = await prisma.user.findUnique({ where: { id } });
     if (!target) throw new AuthError("User not found", 404);
@@ -22,13 +24,26 @@ export async function PATCH(req: Request, { params }: Ctx) {
       );
     }
 
+    if (body.email && body.email !== target.email) {
+      const existing = await prisma.user.findUnique({ where: { email: body.email } });
+      if (existing) {
+        return Response.json(
+          { error: "An account with that email already exists" },
+          { status: 409 },
+        );
+      }
+    }
+
     const user = await prisma.user.update({
       where: { id },
       data: {
+        ...(body.name ? { name: body.name } : {}),
+        ...(body.email ? { email: body.email } : {}),
+        ...(body.password ? { hashedPassword: bcrypt.hashSync(body.password, 10) } : {}),
         ...(body.role ? { role: body.role } : {}),
         ...(typeof body.disabled === "boolean" ? { disabled: body.disabled } : {}),
       },
-      select: { id: true, role: true, disabled: true },
+      select: { id: true, name: true, email: true, role: true, disabled: true },
     });
     return Response.json({ user });
   } catch (err) {

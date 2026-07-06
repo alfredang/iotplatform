@@ -14,9 +14,23 @@ function hashCode(code: string): string {
  * invalidated. Returns the code only in non-production so it can be surfaced
  * for local testing.
  */
+export type OtpPurpose = "login" | "reset" | "verify";
+
+const SUBJECTS: Record<OtpPurpose, string> = {
+  login: "Your login code",
+  reset: "Your password reset code",
+  verify: "Verify your email address",
+};
+
+const ACTIONS: Record<OtpPurpose, string> = {
+  login: "login",
+  reset: "password reset",
+  verify: "email verification",
+};
+
 export async function createOtp(
   email: string,
-  purpose: "login" | "reset" = "login",
+  purpose: OtpPurpose = "login",
 ): Promise<{ devCode?: string }> {
   const normalized = email.trim().toLowerCase();
   const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
@@ -35,12 +49,10 @@ export async function createOtp(
     },
   });
 
-  const subject =
-    purpose === "reset" ? "Your password reset code" : "Your login code";
   await sendEmail({
     to: normalized,
-    subject,
-    text: `Your IoT Platform ${purpose === "reset" ? "password reset" : "login"} code is: ${code}\nIt expires in ${OTP_TTL_MINUTES} minutes.`,
+    subject: SUBJECTS[purpose],
+    text: `Your IoT Platform ${ACTIONS[purpose]} code is: ${code}\nIt expires in ${OTP_TTL_MINUTES} minutes.`,
   });
 
   return process.env.NODE_ENV === "production" ? {} : { devCode: code };
@@ -53,7 +65,7 @@ export async function createOtp(
 export async function verifyOtp(
   email: string,
   code: string,
-  purpose: "login" | "reset" = "login",
+  purpose: OtpPurpose = "login",
 ): Promise<boolean> {
   const normalized = email.trim().toLowerCase();
   const record = await prisma.otpCode.findFirst({

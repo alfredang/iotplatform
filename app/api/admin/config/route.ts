@@ -14,6 +14,11 @@ const configSchema = z.object({
   smtpFrom: z.string().trim().max(200).optional().or(z.literal("")),
   alertEmail: z.string().trim().max(200).optional().or(z.literal("")),
   emailAlertsEnabled: z.boolean().optional(),
+  // Gmail OAuth2 (secret + refresh token are write-only; blank keeps current)
+  gmailUser: z.string().trim().max(200).optional().or(z.literal("")),
+  gmailClientId: z.string().trim().max(300).optional().or(z.literal("")),
+  gmailClientSecret: z.string().max(400).optional(),
+  gmailRefreshToken: z.string().max(600).optional(),
   // n8n
   n8nBaseUrl: z.string().trim().max(300).optional().or(z.literal("")),
   n8nApiKey: z.string().max(2000).optional(), // write-only; blank keeps current
@@ -46,6 +51,11 @@ export async function GET() {
         alertEmail: cfg.alertEmail ?? "",
         emailAlertsEnabled: cfg.emailAlertsEnabled,
         hasPassword: Boolean(cfg.smtpPassword),
+        // Gmail OAuth2
+        gmailUser: cfg.gmailUser ?? "",
+        gmailClientId: cfg.gmailClientId ?? "",
+        hasGmailClientSecret: Boolean(cfg.gmailClientSecret),
+        hasGmailRefreshToken: Boolean(cfg.gmailRefreshToken),
         // n8n
         n8nBaseUrl: cfg.n8nBaseUrl ?? "",
         hasN8nApiKey: Boolean(cfg.n8nApiKey),
@@ -80,6 +90,11 @@ export async function PUT(req: Request) {
         ...(data.emailAlertsEnabled !== undefined
           ? { emailAlertsEnabled: data.emailAlertsEnabled }
           : {}),
+        // Gmail OAuth2
+        ...(data.gmailUser !== undefined ? { gmailUser: data.gmailUser || null } : {}),
+        ...(data.gmailClientId !== undefined ? { gmailClientId: data.gmailClientId || null } : {}),
+        ...(data.gmailClientSecret ? { gmailClientSecret: data.gmailClientSecret } : {}),
+        ...(data.gmailRefreshToken ? { gmailRefreshToken: data.gmailRefreshToken } : {}),
         // n8n
         ...(data.n8nBaseUrl !== undefined ? { n8nBaseUrl: data.n8nBaseUrl || null } : {}),
         ...(data.n8nApiKey ? { n8nApiKey: data.n8nApiKey } : {}),
