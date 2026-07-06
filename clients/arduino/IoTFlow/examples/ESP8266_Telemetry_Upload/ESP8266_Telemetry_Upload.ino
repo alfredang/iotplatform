@@ -21,8 +21,8 @@ const char* MQTT_BROKER = "192.168.3.228";
 const uint16_t MQTT_PORT = 1883;
 
 // ---- Device identity (from the "Add Device" wizard in IoTFlow) ----
-const char* DEVICE_ID    = "esp8266-01";
-const char* DEVICE_TOKEN = "dev_XXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+const char* DEVICE_ID    = "test-device";
+const char* DEVICE_TOKEN = "dev_5LuGr_sFxmjnGpHt4pt5ht3sYw4_bJsV";
 
 const unsigned long PUBLISH_INTERVAL_MS = 10000;
 
