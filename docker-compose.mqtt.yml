@@ -1,0 +1,17 @@
+# Standalone Mosquitto broker, deployable on its own (e.g. alongside a
+# separately hosted web app + database). Mirrors the `mqtt` service in
+# docker-compose.yml exactly, including the real mosquitto/mosquitto.conf
+# bind mount, so behavior matches local/dev.
+services:
+  mqtt:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqtt-data:/mosquitto/data
+
+volumes:
+  mqtt-data:
