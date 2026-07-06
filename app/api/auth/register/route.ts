@@ -16,14 +16,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // First-ever user becomes ADMIN; everyone else is a regular USER.
-    const count = await prisma.user.count();
     await prisma.user.create({
       data: {
         name,
         email,
         hashedPassword: bcrypt.hashSync(password, 10),
-        role: count === 0 ? "ADMIN" : "USER",
+        role: "ADMIN",
         notificationEmail: email,
       },
     });
