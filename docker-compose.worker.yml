@@ -9,3 +9,11 @@ services:
       target: runner
     restart: unless-stopped
     command: ["npm", "run", "worker"]
+    networks:
+      - coolify
+
+# Join Coolify's shared network so this can reach other Coolify-managed
+# resources (e.g. the production Postgres) by their internal hostname.
+networks:
+  coolify:
+    external: true
