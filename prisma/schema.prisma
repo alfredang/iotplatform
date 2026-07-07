@@ -307,6 +307,10 @@ model ApiKey {
   id        String    @id @default(cuid())
   name      String
   keyHash   String    @unique
+  // Reversible copy of the raw key, set only at creation time, so it can be
+  // embedded in outgoing n8n automation events (lib/automations/dispatch.ts).
+  // Null for keys created before this field existed. See lib/crypto.ts.
+  encryptedKey String?
   prefix    String
   ownerId   String
   revoked   Boolean   @default(false)

@@ -1,6 +1,7 @@
 import type { AutomationEvent, Device } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { deliverToWebhook } from "@/lib/n8n";
+import { decryptSecret } from "@/lib/crypto";
 
 /**
  * Event dispatch — the heart of the low-code layer.
@@ -28,11 +29,27 @@ export type EventPayload = {
   strValue?: string | null;
 };
 
-function buildEnvelope(
+/**
+ * The owner's most recent non-revoked API key, decrypted, so n8n flows can
+ * authenticate their callback requests without the key ever being pasted
+ * into the flow by hand. Empty string if the owner has no usable key (never
+ * created one, all revoked, or created before encryptedKey existed).
+ */
+async function resolveApiKeyForEnvelope(ownerId: string): Promise<string> {
+  const key = await prisma.apiKey.findFirst({
+    where: { ownerId, revoked: false, encryptedKey: { not: null } },
+    orderBy: { createdAt: "desc" },
+  });
+  if (!key?.encryptedKey) return "";
+  return decryptSecret(key.encryptedKey) ?? "";
+}
+
+export async function buildEnvelope(
   event: AutomationEvent,
   device: Device,
   payload: EventPayload,
 ) {
+  const apiKey = await resolveApiKeyForEnvelope(device.ownerId);
   return {
     event,
     firedAt: new Date().toISOString(),
@@ -53,6 +70,8 @@ function buildEnvelope(
       base: (process.env.NEXT_PUBLIC_APP_URL || "").replace(/\/$/, ""),
       command: `/api/devices/${device.id}/command`,
       telemetry: "/api/telemetry",
+      // Account API key (iot_...), decrypted; empty string if none is set up.
+      apiKey,
     },
   };
 }
@@ -88,7 +107,7 @@ export async function dispatchEvent(
     });
     if (automations.length === 0) return;
 
-    const envelope = buildEnvelope(event, device, payload);
+    const envelope = await buildEnvelope(event, device, payload);
 
     await Promise.all(
       automations

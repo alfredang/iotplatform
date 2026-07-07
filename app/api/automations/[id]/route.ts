@@ -3,6 +3,7 @@ import { requireApiUser, AuthError } from "@/lib/auth/rbac";
 import { automationUpdateSchema } from "@/lib/validation";
 import { handleApiError, parseBody } from "@/lib/api";
 import { deliverToWebhook } from "@/lib/n8n";
+import { buildEnvelope } from "@/lib/automations/dispatch";
 
 export const dynamic = "force-dynamic";
 
@@ -58,13 +59,39 @@ export async function POST(req: Request, { params }: Ctx) {
     const user = await requireApiUser("USER");
     const { id } = await params;
     const automation = await getOwned(id, user.id);
+
+    // Use the automation's real device filter if set, so the test payload has
+    // a genuine id/api.command URL and a real API key. Otherwise fall back to
+    // a placeholder device (still resolves the owner's API key correctly).
+    const device = automation.deviceId
+      ? await prisma.device.findUnique({ where: { id: automation.deviceId } })
+      : null;
+
+    const envelope = await buildEnvelope(
+      automation.event,
+      device ?? {
+        id: "test-device-id",
+        deviceId: "test-device",
+        name: "Test Device",
+        type: "Generic",
+        status: "ONLINE",
+        ownerId: user.id,
+        projectId: automation.projectId,
+        location: null,
+        latitude: null,
+        longitude: null,
+        lastSeen: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        protocol: "HTTP",
+      },
+      { metric: "temperature", value: 42, message: "Test event from IoTFlow" },
+    );
+
     // Send a sample envelope so users can confirm their n8n flow fires.
     const { ok, status } = await deliverToWebhook(automation.n8nWebhookUrl, {
-      event: automation.event,
+      ...envelope,
       test: true,
-      firedAt: new Date().toISOString(),
-      device: { deviceId: "test-device", name: "Test Device", status: "ONLINE" },
-      payload: { metric: "temperature", value: 42, message: "Test event from IoTFlow" },
     });
     await prisma.automation.update({
       where: { id },

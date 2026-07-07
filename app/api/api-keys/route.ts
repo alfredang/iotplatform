@@ -3,6 +3,7 @@ import { requireApiUser } from "@/lib/auth/rbac";
 import { apiKeySchema } from "@/lib/validation";
 import { handleApiError, parseBody } from "@/lib/api";
 import { generateApiKey } from "@/lib/tokens";
+import { encryptSecret } from "@/lib/crypto";
 
 export async function GET() {
   try {
@@ -31,7 +32,13 @@ export async function POST(req: Request) {
     const { name } = await parseBody(req, apiKeySchema);
     const key = generateApiKey();
     const created = await prisma.apiKey.create({
-      data: { name, keyHash: key.hash, prefix: key.prefix, ownerId: user.id },
+      data: {
+        name,
+        keyHash: key.hash,
+        encryptedKey: encryptSecret(key.token),
+        prefix: key.prefix,
+        ownerId: user.id,
+      },
     });
     // Raw key returned once.
     return Response.json(
