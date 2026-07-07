@@ -96,9 +96,10 @@ log or call AI.
   deactivate, delete users), API keys, blog and enquiries; a **Settings** page
   stores email (**Gmail OAuth2** or SMTP, with a send-test-email button),
   **Sign in with Google**, **n8n** and **MQTT** config in the database (env vars
-  are the fallback). **View as** lets admins preview as a user; regular users
-  can create projects & dashboards while device/automation/alert management is
-  admin-only.
+  are the fallback). **View as** lets admins preview as a user; any signed-in
+  user can create projects, dashboards and devices (owner-scoped, with
+  self-service token regeneration), while automations, alert rules and API
+  keys stay admin-only. Role changes apply live — no re-login needed.
 - **Maps** — OpenStreetMap view of GPS-enabled devices.
 - **API keys** — account-level keys for HTTP telemetry submission and n8n callbacks.
 - **Industry-focused landing page** — agriculture, industrial, smart home, energy,
