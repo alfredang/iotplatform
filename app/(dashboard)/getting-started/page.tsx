@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  Rocket, Cpu, LayoutDashboard, SlidersHorizontal, Workflow, UploadCloud,
+  Rocket, Cpu, LayoutDashboard, SlidersHorizontal, Workflow, UploadCloud, KeyRound,
   CheckCircle2, ArrowRight, type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/misc";
@@ -98,6 +98,19 @@ const TUTORIALS: Tutorial[] = [
     ],
     cta: { label: "Read the full tutorial", href: "/tutorials/esp8266-telemetry-upload" },
   },
+  {
+    icon: KeyRound,
+    title: "7 · Create an API key and set up alerts",
+    time: "6 min",
+    intro: "One key for all your devices, plus an alert the moment a reading crosses a threshold. Needs the Admin role.",
+    steps: [
+      "Go to API Keys → Create API key, name it, and copy the iot_… key — it is shown only once.",
+      "POST to /api/telemetry with Authorization: Bearer <key> and the device's Device ID in the JSON body.",
+      "Go to Alerts → Create rule: pick the device, condition, metric and threshold (e.g. temperature > 30).",
+      "Send a reading above the threshold to test it, then click Resolve once handled.",
+    ],
+    cta: { label: "Watch the video tutorial", href: "/tutorials/api-keys-and-alerts" },
+  },
 ];
 
 export default function GettingStartedPage() {
@@ -105,7 +118,7 @@ export default function GettingStartedPage() {
     <div className="space-y-8">
       <PageHeader
         title="Getting started"
-        description="Six short tutorials to go from zero to a live, automated IoT dashboard."
+        description="Seven short tutorials to go from zero to a live, automated IoT dashboard."
       />
 
       <div className="space-y-5">

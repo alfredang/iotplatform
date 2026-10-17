@@ -1,4 +1,4 @@
-import { Cpu, Radio, Gauge, SlidersHorizontal, Workflow, UploadCloud, type LucideIcon } from "lucide-react";
+import { Cpu, Radio, Gauge, SlidersHorizontal, Workflow, UploadCloud, KeyRound, type LucideIcon } from "lucide-react";
 
 export type TutStep = {
   title: string;
@@ -15,6 +15,8 @@ export type Tutorial = {
   title: string;
   time: string;
   summary: string;
+  /** Optional walkthrough video shown above the steps. */
+  video?: { src: string; poster?: string; title: string };
   steps: TutStep[];
 };
 
@@ -277,6 +279,72 @@ while True:
       {
         title: "Watch it arrive, then visualise it",
         body: "Open the Dashboard — a new reading lands under Latest Telemetry every 10 seconds. Bind Number, Gauge or Line-chart widgets to the temperature, humidity and voltage metrics (see Tutorial 3) and you have a live sensor feed.",
+      },
+    ],
+  },
+  {
+    slug: "api-keys-and-alerts",
+    num: 7,
+    icon: KeyRound,
+    title: "Create an API key and set up alerts",
+    time: "6 min",
+    summary:
+      "Create an account-level API key, send telemetry with it, and get an alert the moment a reading crosses a threshold — plus how to get the mobile app.",
+    video: {
+      src: "/tutorials/t7-api-keys-alerts.mp4",
+      poster: "/tutorials/t7-video-poster.jpg",
+      title: "Walkthrough: create an API key, send data, create and trigger an alert rule",
+    },
+    steps: [
+      {
+        title: "Make sure your account is an Admin",
+        body: "Creating API keys and alert rules needs the Admin role. If the API Keys page says “Ask an administrator to create a key”, ask your IoTFlow administrator to set your role to Admin under Admin → Users — it applies within about 30 seconds, no sign-out needed. Keep the Admin | User toggle in the top bar on Admin, or the create buttons stay hidden.",
+      },
+      {
+        title: "Do you need an API key at all?",
+        body: "Every device already has its own device token (dev_…) on its device page — that’s all one board needs. An API key (iot_…) is one key for all your devices: handy for a gateway or script that reports for several of them. With an API key you include the device’s Device ID in every message.",
+      },
+      {
+        title: "Create the API key",
+        body: "In the sidebar, open API Keys and click Create API key (top right). Give it a name you’ll recognise later, e.g. “Classroom sensors”, and click Create.",
+        image: "/tutorials/t7-create-api-key.jpg",
+        caption: "Naming a new API key.",
+      },
+      {
+        title: "Copy it now — it is shown only once",
+        body: "Click Copy and store the key somewhere safe (a password manager or your script’s config). Only its prefix is kept, so if you lose it, revoke it with the bin icon and create a new one. Anything using a revoked key stops sending immediately.",
+        image: "/tutorials/t7-copy-api-key.jpg",
+        caption: "The full key appears once, right after you create it.",
+      },
+      {
+        title: "Send telemetry with the key",
+        body: "POST to /api/telemetry with the key as a Bearer token. Put the device’s Device ID (shown on its device page) and your readings in the JSON body. A 201 response means it was stored; every number becomes its own metric.",
+        code: `curl -X POST https://YOUR-HOST/api/telemetry \\
+  -H "Authorization: Bearer iot_YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"deviceId": "YOUR_DEVICE_ID", "temperature": 27.4, "humidity": 63}'
+
+# Python
+import requests
+requests.post("https://YOUR-HOST/api/telemetry",
+    headers={"Authorization": "Bearer iot_YOUR_API_KEY"},
+    json={"deviceId": "YOUR_DEVICE_ID", "temperature": 27.4, "humidity": 63})`,
+      },
+      {
+        title: "Create an alert rule",
+        body: "Open Alerts → Create rule. Name it, pick the device, choose a condition (greater than, less than, ≥, ≤, equals, or device offline), then the metric and threshold — e.g. temperature > 30. The metric list is built from data the device has already sent, so send one reading first. The Alerts page only lists devices in the current project.",
+        image: "/tutorials/t7-create-alert-rule.jpg",
+        caption: "A rule that fires when temperature goes above 30.",
+      },
+      {
+        title: "Trigger it, then resolve it",
+        body: "Send a reading above the threshold (e.g. temperature 34.5). Within seconds the alert appears under Active alerts and in the mobile app. Click Resolve once it’s handled; while an alert is active the same rule won’t raise duplicates. To forward alerts to Telegram, Slack, email or a sheet, add an Automation with the Alert trigger (Tutorial 5).",
+        image: "/tutorials/t7-active-alert.jpg",
+        caption: "The triggered alert, ready to resolve.",
+      },
+      {
+        title: "Get the mobile app",
+        body: "iPhone / iPad: search “IoTFlow” on the App Store (apps.apple.com/us/app/iotflow/id6781005693). Android is in closed testing — contact us with your Gmail to join as a tester. Sign in with the same email and password as the website; if you registered with Google, set a password first via Forgot password. Dashboards, controls, devices and alerts are all there.",
       },
     ],
   },

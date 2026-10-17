@@ -4,7 +4,7 @@ import { TUTORIALS } from "@/lib/tutorials";
 
 export const metadata = {
   title: "Tutorials — IoTFlow",
-  description: "Six step-by-step tutorials to go from zero to a live, automated IoT dashboard with IoTFlow.",
+  description: "Seven step-by-step tutorials to go from zero to a live, automated IoT dashboard with IoTFlow.",
 };
 
 export default function TutorialsIndex() {
@@ -13,7 +13,7 @@ export default function TutorialsIndex() {
       <div className="mx-auto max-w-2xl text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Tutorials</h1>
         <p className="mt-4 text-lg text-muted">
-          Six short, step-by-step guides — with screenshots — that take you from zero to a
+          Seven short, step-by-step guides — with screenshots — that take you from zero to a
           live, automated IoT dashboard.
         </p>
       </div>

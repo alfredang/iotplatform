@@ -45,6 +45,25 @@ export default async function TutorialPage({ params }: { params: Promise<{ slug:
         </div>
       </header>
 
+      {t.video && (
+        <figure className="mt-8">
+          <video
+            src={t.video.src}
+            poster={t.video.poster}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full rounded-card border border-border bg-black shadow-sm"
+          />
+          <figcaption className="mt-2 flex flex-wrap items-center justify-center gap-x-3 text-center text-xs text-muted">
+            <span>{t.video.title}</span>
+            <a href={t.video.src} download className="text-primary hover:underline">
+              Download video
+            </a>
+          </figcaption>
+        </figure>
+      )}
+
       <ol className="mt-10 space-y-10">
         {t.steps.map((s, i) => (
           <li key={i} className="relative border-l border-border pl-8">
