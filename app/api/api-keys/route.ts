@@ -28,7 +28,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const user = await requireApiUser("ADMIN");
+    const user = await requireApiUser();
     const { name } = await parseBody(req, apiKeySchema);
     const key = generateApiKey();
     const created = await prisma.apiKey.create({

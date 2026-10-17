@@ -104,7 +104,7 @@ const TUTORIALS: Tutorial[] = [
     icon: KeyRound,
     title: "7 · Create an API key and set up alerts",
     time: "6 min",
-    intro: "One key for all your devices, plus an alert the moment a reading crosses a threshold. Needs the Admin role.",
+    intro: "One key for all your devices, plus an alert the moment a reading crosses a threshold.",
     steps: [
       "Go to API Keys → Create API key, name it, and copy the iot_… key — it is shown only once.",
       "POST to /api/telemetry with Authorization: Bearer <key> and the device's Device ID in the JSON body.",

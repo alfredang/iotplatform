@@ -33,7 +33,7 @@ export async function POST(req: Request) {
           name,
           email,
           hashedPassword: bcrypt.hashSync(password, 10),
-          role: "ADMIN",
+          role: "USER",
           notificationEmail: email,
         },
       });
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         email,
         hashedPassword: bcrypt.hashSync(defaultPassword, 10),
         mustChangePassword: true,
-        role: "ADMIN",
+        role: "USER",
         notificationEmail: email,
       },
     });

@@ -50,7 +50,7 @@ export async function GET(req: Request) {
 /** POST /api/alerts — create an alert rule. */
 export async function POST(req: Request) {
   try {
-    const user = await requireApiUser("ADMIN");
+    const user = await requireApiUser();
     const data = await parseBody(req, alertRuleSchema);
     await getOwnedDevice(data.deviceId, user.id);
 

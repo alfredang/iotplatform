@@ -297,10 +297,6 @@ while True:
     },
     steps: [
       {
-        title: "Make sure your account is an Admin",
-        body: "Creating API keys and alert rules needs the Admin role. If the API Keys page says “Ask an administrator to create a key”, ask your IoTFlow administrator to set your role to Admin under Admin → Users — it applies within about 30 seconds, no sign-out needed. Keep the Admin | User toggle in the top bar on Admin, or the create buttons stay hidden.",
-      },
-      {
         title: "Do you need an API key at all?",
         body: "Every device already has its own device token (dev_…) on its device page — that’s all one board needs. An API key (iot_…) is one key for all your devices: handy for a gateway or script that reports for several of them. With an API key you include the device’s Device ID in every message.",
       },

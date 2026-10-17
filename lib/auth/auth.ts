@@ -76,7 +76,7 @@ const credentialProviders: NextAuthConfig["providers"] = [
       const user = await prisma.user.upsert({
         where: { email },
         update: { emailVerified: new Date() },
-        create: { email, emailVerified: new Date(), role: "ADMIN" },
+        create: { email, emailVerified: new Date(), role: "USER" },
       });
       return {
         id: user.id,

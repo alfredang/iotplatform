@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { apiFetch, fetcher } from "@/lib/client";
 import { useProject, withProject } from "@/components/project/project-context";
-import { useRole } from "@/components/auth/role-context";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,7 +46,6 @@ const EVENTS = [
 
 export function AutomationsManager() {
   const { projectId } = useProject();
-  const { isAdmin } = useRole();
   const { data, mutate, isLoading } = useSWR<{ automations: Automation[] }>(
     withProject("/api/automations", projectId),
     fetcher,
@@ -83,9 +81,7 @@ export function AutomationsManager() {
 
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Your automations</h2>
-        {isAdmin && (
-          <AddAutomation onAdded={() => mutate()} workflows={n8n?.workflows ?? []} />
-        )}
+        <AddAutomation onAdded={() => mutate()} workflows={n8n?.workflows ?? []} />
       </div>
 
       {isLoading ? (

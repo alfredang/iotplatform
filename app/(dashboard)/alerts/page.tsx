@@ -5,7 +5,6 @@ import useSWR from "swr";
 import { Bell, CheckCircle2, Trash2 } from "lucide-react";
 import { apiFetch, fetcher } from "@/lib/client";
 import { useProject, withProject } from "@/components/project/project-context";
-import { useRole } from "@/components/auth/role-context";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +44,6 @@ const OPERATORS = [
 
 export default function AlertsPage() {
   const { projectId } = useProject();
-  const { isAdmin } = useRole();
   const { data, isLoading, mutate } = useSWR<{ alerts: Alert[]; rules: Rule[] }>(
     withProject("/api/alerts", projectId),
     fetcher,
@@ -79,11 +77,7 @@ export default function AlertsPage() {
       <PageHeader
         title="Alerts"
         description="Create rules and respond to triggered alerts."
-        action={
-          isAdmin ? (
-            <Button onClick={() => setShowCreate(true)}>Create rule</Button>
-          ) : undefined
-        }
+        action={<Button onClick={() => setShowCreate(true)}>Create rule</Button>}
       />
 
       {isLoading ? (
@@ -135,11 +129,7 @@ export default function AlertsPage() {
                   <EmptyState
                     icon={<Bell className="h-8 w-8" />}
                     title="No rules yet"
-                    description={
-                      isAdmin
-                        ? "Create a rule to get notified when a metric crosses a threshold."
-                        : "An administrator can create rules that notify you when a metric crosses a threshold."
-                    }
+                    description="Create a rule to get notified when a metric crosses a threshold."
                   />
                 </div>
               ) : (

@@ -10,8 +10,7 @@ const RoleContext = createContext<RoleContextValue>({ role: "USER", isAdmin: fal
 
 /**
  * Exposes the *effective* role to client components so the UI can hide
- * admin-only actions (device/automation/alert-rule/API-key creation, token
- * regeneration). An admin "viewing as user" reads as USER here — the real
+ * admin-only actions. An admin "viewing as user" reads as USER here — the real
  * authorization check stays server-side in the API routes.
  */
 export function RoleProvider({

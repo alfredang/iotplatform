@@ -44,9 +44,10 @@ alert rule and fully populated dashboards so you can explore immediately.
 (The [live demo](https://iot.tertiaryinfotech.com) is not seeded — register your
 own account or use Google sign-in.)
 
-> Accounts created through the sign-up form (or a first-time email-code sign-in)
-> are **Admins** — so a fresh install needs no manual setup. Google/GitHub
-> sign-ups start as regular Users; promote them from Admin → Users.
+> New accounts (sign-up form, email code, Google or GitHub) are regular **Users**
+> with every IoT feature unlocked. Admin is only for running the platform (users,
+> blog, enquiries, settings) — promote staff from Admin → Users, or with
+> `npm run db:seed` locally use `admin@demo.io`.
 
 ---
 
@@ -102,9 +103,9 @@ log or call AI.
   send-test-email button),
   **Sign in with Google**, **n8n** and **MQTT** config in the database (env vars
   are the fallback). **View as** lets admins preview as a user; any signed-in
-  user can create projects, dashboards and devices (owner-scoped, with
-  self-service token regeneration), while automations, alert rules and API
-  keys stay admin-only. Role changes apply live — no re-login needed.
+  user can create projects, dashboards, devices, API keys, alert rules and
+  automations (all owner-scoped); the Admin area (users, blog, enquiries,
+  settings) is admin-only. Role changes apply live — no re-login needed.
 - **Maps** — OpenStreetMap view of GPS-enabled devices.
 - **API keys** — account-level keys for HTTP telemetry submission and n8n callbacks.
 - **Industry-focused landing page** — agriculture, industrial, smart home, energy,
