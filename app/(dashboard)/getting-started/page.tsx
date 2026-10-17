@@ -15,6 +15,8 @@ type Tutorial = {
   time: string;
   intro: string;
   steps: string[];
+  /** Optional walkthrough video embedded in the card. */
+  video?: { src: string; poster?: string };
   cta: { label: string; href: string };
 };
 
@@ -109,7 +111,8 @@ const TUTORIALS: Tutorial[] = [
       "Go to Alerts → Create rule: pick the device, condition, metric and threshold (e.g. temperature > 30).",
       "Send a reading above the threshold to test it, then click Resolve once handled.",
     ],
-    cta: { label: "Watch the video tutorial", href: "/tutorials/api-keys-and-alerts" },
+    video: { src: "/tutorials/t7-api-keys-alerts.mp4", poster: "/tutorials/t7-video-poster.jpg" },
+    cta: { label: "Read the full tutorial", href: "/tutorials/api-keys-and-alerts" },
   },
 ];
 
@@ -144,6 +147,17 @@ export default function GettingStartedPage() {
                       </li>
                     ))}
                   </ol>
+
+                  {t.video && (
+                    <video
+                      src={t.video.src}
+                      poster={t.video.poster}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="mt-4 w-full max-w-2xl rounded-card border border-border bg-black"
+                    />
+                  )}
 
                   <div className="mt-4">
                     <Link href={t.cta.href}>

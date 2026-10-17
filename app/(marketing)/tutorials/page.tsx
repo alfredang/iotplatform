@@ -18,6 +18,29 @@ export default function TutorialsIndex() {
         </p>
       </div>
 
+      {TUTORIALS.filter((t) => t.video).map((t) => (
+        <section key={t.slug} className="mt-12 rounded-card border border-border bg-surface p-5 sm:p-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Video walkthrough</p>
+          <h2 className="mt-1 text-xl font-semibold">{t.title}</h2>
+          <video
+            src={t.video!.src}
+            poster={t.video!.poster}
+            controls
+            playsInline
+            preload="metadata"
+            className="mt-4 w-full rounded-card border border-border bg-black"
+          />
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            <Link href={`/tutorials/${t.slug}`} className="font-medium text-primary hover:underline">
+              Read the step-by-step guide
+            </Link>
+            <a href={t.video!.src} download className="text-muted hover:text-foreground">
+              Download video
+            </a>
+          </div>
+        </section>
+      ))}
+
       <div className="mt-12 space-y-4">
         {TUTORIALS.map((t) => (
           <Link
