@@ -414,6 +414,10 @@ model AppConfig {
   gmailClientId      String?
   gmailClientSecret  String?
   gmailRefreshToken  String?
+  // Google service-account JSON key (domain-wide delegation). Preferred over
+  // the refresh token when set: it keeps working when the mailbox password
+  // changes. Falls back to GMAIL_SERVICE_ACCOUNT_JSON.
+  gmailServiceAccountJson String?
   // "Sign in with Google" OAuth client (falls back to GOOGLE_CLIENT_ID /
   // GOOGLE_CLIENT_SECRET env vars)
   googleClientId     String?

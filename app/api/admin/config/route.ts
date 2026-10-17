@@ -20,6 +20,24 @@ const configSchema = z.object({
   gmailClientId: z.string().trim().max(300).optional().or(z.literal("")),
   gmailClientSecret: z.string().max(400).optional(),
   gmailRefreshToken: z.string().max(600).optional(),
+  // Service-account JSON key (write-only; blank keeps current). Must be the
+  // full key file so we can extract client_id + private_key at send time.
+  gmailServiceAccountJson: z
+    .string()
+    .max(10_000)
+    .optional()
+    .refine(
+      (v) => {
+        if (!v) return true;
+        try {
+          const key = JSON.parse(v) as { client_id?: string; private_key?: string };
+          return Boolean(key.client_id && key.private_key);
+        } catch {
+          return false;
+        }
+      },
+      { message: "Must be a service-account JSON key with client_id and private_key" },
+    ),
   // "Sign in with Google" (secret is write-only; blank keeps current)
   googleClientId: z.string().trim().max(300).optional().or(z.literal("")),
   googleClientSecret: z.string().max(400).optional(),
@@ -60,6 +78,7 @@ export async function GET() {
         gmailClientId: cfg.gmailClientId ?? "",
         hasGmailClientSecret: Boolean(cfg.gmailClientSecret),
         hasGmailRefreshToken: Boolean(cfg.gmailRefreshToken),
+        hasGmailServiceAccount: Boolean(cfg.gmailServiceAccountJson),
         // Google sign-in
         googleClientId: cfg.googleClientId ?? "",
         hasGoogleClientSecret: Boolean(cfg.googleClientSecret),
@@ -102,6 +121,9 @@ export async function PUT(req: Request) {
         ...(data.gmailClientId !== undefined ? { gmailClientId: data.gmailClientId || null } : {}),
         ...(data.gmailClientSecret ? { gmailClientSecret: data.gmailClientSecret } : {}),
         ...(data.gmailRefreshToken ? { gmailRefreshToken: data.gmailRefreshToken } : {}),
+        ...(data.gmailServiceAccountJson
+          ? { gmailServiceAccountJson: data.gmailServiceAccountJson }
+          : {}),
         // Google sign-in
         ...(data.googleClientId !== undefined
           ? { googleClientId: data.googleClientId || null }

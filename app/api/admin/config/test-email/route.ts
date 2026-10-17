@@ -21,12 +21,12 @@ export async function POST(req: Request) {
     }
 
     try {
-      const { delivered } = await sendEmail({
+      const { delivered, transport, errors } = await sendEmail({
         to: recipient,
         subject: "IoTFlow test email",
         text: "This is a test email from your IoTFlow admin settings. If you can read this, outgoing email works.",
       });
-      return Response.json({ ok: true, delivered, to: recipient });
+      return Response.json({ ok: true, delivered, transport, warnings: errors, to: recipient });
     } catch (sendErr) {
       // Surface the transport error so admins can debug their settings.
       const message = sendErr instanceof Error ? sendErr.message : "Send failed";

@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { apiFetch, fetcher } from "@/lib/client";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Field, Input } from "@/components/ui/input";
+import { Field, Input, Textarea } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/misc";
 
@@ -21,6 +21,7 @@ type Config = {
   gmailClientId: string;
   hasGmailClientSecret: boolean;
   hasGmailRefreshToken: boolean;
+  hasGmailServiceAccount: boolean;
   googleClientId: string;
   hasGoogleClientSecret: boolean;
   n8nBaseUrl: string;
@@ -35,6 +36,7 @@ type FormExtra = {
   smtpPassword?: string;
   gmailClientSecret?: string;
   gmailRefreshToken?: string;
+  gmailServiceAccountJson?: string;
   googleClientSecret?: string;
   n8nApiKey?: string;
   mqttPassword?: string;
@@ -55,7 +57,7 @@ export function EmailSettings() {
     (form[k] ?? cfg?.[k]) as Config[K];
 
   function set(k: keyof Config | keyof FormExtra) {
-    return (e: React.ChangeEvent<HTMLInputElement>) =>
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((f) => ({ ...f, [k]: e.target.value }));
   }
 
@@ -71,6 +73,7 @@ export function EmailSettings() {
         smtpPassword: "",
         gmailClientSecret: "",
         gmailRefreshToken: "",
+        gmailServiceAccountJson: "",
         googleClientSecret: "",
         n8nApiKey: "",
         mqttPassword: "",
@@ -90,15 +93,20 @@ export function EmailSettings() {
     setTestResult("");
     setError("");
     try {
-      const res = await apiFetch<{ delivered: boolean; to: string }>(
-        "/api/admin/config/test-email",
-        { method: "POST", body: JSON.stringify({}) },
-      );
-      setTestResult(
-        res.delivered
-          ? `Test email sent to ${res.to}`
-          : "No email transport configured — message was logged to the server console",
-      );
+      const res = await apiFetch<{
+        delivered: boolean;
+        to: string;
+        transport: string | null;
+        warnings: string[];
+      }>("/api/admin/config/test-email", { method: "POST", body: JSON.stringify({}) });
+      if (res.delivered) {
+        const fellBack = res.warnings?.length
+          ? ` (after ${res.warnings.length} failed transport${res.warnings.length > 1 ? "s" : ""}: ${res.warnings.join("; ")})`
+          : "";
+        setTestResult(`Test email sent to ${res.to} via ${res.transport}${fellBack}`);
+      } else {
+        setTestResult("No email transport configured — message was logged to the server console");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Test email failed");
     } finally {
@@ -154,15 +162,20 @@ export function EmailSettings() {
       <Card>
         <CardHeader>
           <CardTitle>Gmail (OAuth2)</CardTitle>
+          {cfg.hasGmailServiceAccount && <Badge tone="success">Service account</Badge>}
           {cfg.hasGmailRefreshToken && <Badge tone="success">Connected</Badge>}
         </CardHeader>
         <CardBody className="space-y-4">
           <p className="text-sm text-muted">
             Send email through a Gmail account using Google OAuth2 — used for
             verification codes, one-time login codes, password resets and
-            alerts. Takes precedence over SMTP when fully configured. Get a
+            alerts. Transports are tried in order: service account → refresh
+            token → SMTP, falling through automatically when one fails. Get a
             refresh token with{" "}
             <code className="rounded bg-surface-2 px-1">node scripts/gmail-oauth.mjs</code>.
+            <strong className="font-medium"> Note:</strong> Google revokes the
+            refresh token whenever the Gmail account&apos;s password changes — a
+            service account (domain-wide delegation) keeps working.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Gmail address">
@@ -188,6 +201,21 @@ export function EmailSettings() {
               />
             </Field>
           </div>
+          <Field
+            label="Service account key (JSON, domain-wide delegation)"
+            hint={
+              cfg.hasGmailServiceAccount
+                ? "Leave blank to keep current."
+                : "Paste the full JSON key file. The service account must have domain-wide delegation for scope https://mail.google.com/ and the Gmail address above is the mailbox it sends as."
+            }
+          >
+            <Textarea
+              value={form.gmailServiceAccountJson ?? ""}
+              onChange={set("gmailServiceAccountJson")}
+              placeholder='{"type": "service_account", "client_id": "...", "private_key": "-----BEGIN PRIVATE KEY-----..."}'
+              spellCheck={false}
+            />
+          </Field>
         </CardBody>
       </Card>
 
