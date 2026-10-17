@@ -5,6 +5,7 @@ import { handleApiError } from "@/lib/api";
 import { setCommand, getPinStates } from "@/lib/commands";
 import { resolveApiKey } from "@/lib/telemetry/ingest";
 import { commandSchema } from "@/lib/validation";
+import { consumeMessages } from "@/lib/usage";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,7 @@ export async function POST(req: Request, { params }: Ctx) {
     const ownerId = await resolveOwner(req);
     const { id } = await params;
     const device = await getOwnedDevice(id, ownerId);
+    await consumeMessages(ownerId);
 
     let body: unknown;
     try {

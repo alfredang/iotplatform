@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  Rocket, Cpu, LayoutDashboard, SlidersHorizontal, Workflow, UploadCloud, KeyRound,
+  UserPlus, Rocket, Cpu, LayoutDashboard, SlidersHorizontal, Workflow, UploadCloud, KeyRound,
   CheckCircle2, ArrowRight, type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/misc";
@@ -22,8 +22,21 @@ type Tutorial = {
 
 const TUTORIALS: Tutorial[] = [
   {
+    icon: UserPlus,
+    title: "1 · Create your free account",
+    time: "2 min",
+    intro: "You've done this one already — here's how sign-in works, for when you invite others.",
+    steps: [
+      "Sign up with just a name and email (or Continue with Google).",
+      "Open the welcome email for your default password.",
+      "Sign in with an emailed code, that password, or Google.",
+      "Set your own password — then every feature is unlocked on the Free plan.",
+    ],
+    cta: { label: "See plans & usage", href: "/billing" },
+  },
+  {
     icon: Cpu,
-    title: "1 · Add your first device",
+    title: "2 · Add your first device",
     time: "2 min",
     intro: "Register a device and get the token it uses to talk to the platform.",
     steps: [
@@ -36,7 +49,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     icon: Rocket,
-    title: "2 · Send your first reading",
+    title: "3 · Send your first reading",
     time: "5 min",
     intro: "Push a sensor value from an ESP32, Arduino or Raspberry Pi and see it live.",
     steps: [
@@ -49,7 +62,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     icon: LayoutDashboard,
-    title: "3 · Build a dashboard",
+    title: "4 · Build a dashboard",
     time: "3 min",
     intro: "Turn raw readings into number cards, gauges and charts.",
     steps: [
@@ -62,7 +75,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     icon: SlidersHorizontal,
-    title: "4 · Control a device (two-way)",
+    title: "5 · Control a device (two-way)",
     time: "5 min",
     intro: "Flip a relay or LED from the dashboard using Blynk-style virtual pins.",
     steps: [
@@ -75,7 +88,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     icon: Workflow,
-    title: "5 · Automate with n8n",
+    title: "6 · Automate with n8n",
     time: "8 min",
     intro: "Run no-code logic when a device event happens — notify, control or log.",
     steps: [
@@ -88,7 +101,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     icon: UploadCloud,
-    title: "6 · Upload telemetry every 10 seconds (ESP8266 & Python)",
+    title: "7 · Upload telemetry every 10 seconds (ESP8266 & Python)",
     time: "10 min",
     intro: "Publish temperature, humidity and voltage over MQTT on a fixed interval — from an ESP8266 sketch or the iotflow Python package.",
     steps: [
@@ -102,7 +115,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     icon: KeyRound,
-    title: "7 · Create an API key and set up alerts",
+    title: "8 · Create an API key and set up alerts",
     time: "6 min",
     intro: "One key for all your devices, plus an alert the moment a reading crosses a threshold.",
     steps: [
@@ -121,7 +134,7 @@ export default function GettingStartedPage() {
     <div className="space-y-8">
       <PageHeader
         title="Getting started"
-        description="Seven short tutorials to go from zero to a live, automated IoT dashboard."
+        description="Eight short tutorials to go from zero to a live, automated IoT dashboard."
       />
 
       <div className="space-y-5">

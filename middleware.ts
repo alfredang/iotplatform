@@ -13,6 +13,7 @@ const PROTECTED = [
   "/maps",
   "/api-keys",
   "/settings",
+  "/billing",
 ];
 
 export default auth((req) => {
@@ -37,5 +38,6 @@ export const config = {
     "/maps/:path*",
     "/api-keys/:path*",
     "/settings/:path*",
+    "/billing/:path*",
   ],
 };

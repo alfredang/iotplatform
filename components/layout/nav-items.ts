@@ -15,6 +15,7 @@ import {
   BookOpen,
   GraduationCap,
   Newspaper,
+  CreditCard,
   type LucideIcon,
 } from "lucide-react";
 
@@ -32,6 +33,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/automations", label: "Automations", icon: Workflow },
   { href: "/maps", label: "Maps", icon: Map },
   { href: "/api-keys", label: "API Keys", icon: KeyRound },
+  { href: "/billing", label: "Plan & billing", icon: CreditCard },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

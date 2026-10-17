@@ -2,6 +2,8 @@
 // deploy test #2: confirming GitHub webhook -> Coolify auto-deploy
 import Link from "next/link";
 import {
+  KeyRound,
+  UserPlus,
   Activity,
   ArrowRight,
   Bell,
@@ -40,6 +42,7 @@ import { WhatsAppButton } from "@/components/marketing/whatsapp-button";
 import { AppStoreBadge } from "@/components/marketing/app-store-badge";
 import { GithubIcon, LinkedinIcon } from "@/components/marketing/brand-icons";
 import { SiteHeader } from "@/components/marketing/site-header";
+import { PricingIncluded, PricingTable } from "@/components/marketing/pricing-table";
 import { prisma } from "@/lib/db/prisma";
 import { postCardSelect } from "@/lib/blog";
 
@@ -89,12 +92,24 @@ const STEPS = [
 
 const TUTORIALS = [
   {
+    slug: "create-your-account",
+    icon: UserPlus,
+    title: "Create your free account",
+    time: "2 min",
+    steps: [
+      "Sign up with your name and email.",
+      "Get your password by email.",
+      "Sign in with a code, password or Google.",
+      "Set your own password — you're in.",
+    ],
+  },
+  {
     slug: "add-your-first-device",
     icon: Cpu,
     title: "Add your first device",
     time: "2 min",
     steps: [
-      "Sign up and pick a project.",
+      "Pick (or create) a project.",
       "Open Add Device and name it.",
       "Choose HTTP or MQTT and create it.",
       "Copy the device token (shown once).",
@@ -158,6 +173,18 @@ const TUTORIALS = [
       "ESP8266: flash the Telemetry_Upload sketch.",
       "Or Python: pip install \"iotflow[mqtt]\".",
       "Publish every 10 s; watch it live.",
+    ],
+  },
+  {
+    slug: "api-keys-and-alerts",
+    icon: KeyRound,
+    title: "API keys & alerts",
+    time: "6 min",
+    steps: [
+      "Create an API key (iot_…) — copy it once.",
+      "Send data for any device with it.",
+      "Create an alert rule, e.g. temp > 30.",
+      "Trigger it, then resolve it.",
     ],
   },
 ];
@@ -359,7 +386,7 @@ export default async function LandingPage() {
       <section id="tutorials" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Get started in 6 short tutorials
+            Get started in 8 short tutorials
           </h2>
           <p className="mt-3 text-muted">
             From zero to a live, automated IoT dashboard — no heavy code required.
@@ -522,6 +549,20 @@ export default async function LandingPage() {
         </section>
       )}
 
+      {/* Pricing */}
+      <section id="pricing" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Start free, upgrade when you grow</h2>
+          <p className="mt-3 text-muted">
+            Every account gets the full platform. Paid plans add devices and higher message limits.
+          </p>
+        </div>
+        <div className="mt-10">
+          <PricingTable />
+          <PricingIncluded />
+        </div>
+      </section>
+
       {/* Community / free */}
       <section className="border-y border-border bg-gradient-to-br from-primary/10 via-surface to-accent/10">
         <div className="mx-auto max-w-4xl px-4 py-8 text-center sm:px-6">
@@ -529,8 +570,9 @@ export default async function LandingPage() {
             Free &amp; open for the community
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted">
-            IoTFlow is free to self-host. Deploy with Docker or Coolify, own your
-            data, and adapt it to your needs. No seats, no quotas, no lock-in.
+            IoTFlow is free to self-host — deploy with Docker or Coolify, own your
+            data, and adapt it to your needs, with no quotas. Prefer not to run
+            servers? Use our hosted cloud and start on the free plan.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href="/register">
@@ -609,6 +651,7 @@ export default async function LandingPage() {
               <li><Link href="/login" className="hover:text-foreground">Log in</Link></li>
               <li><Link href="/register" className="hover:text-foreground">Sign up</Link></li>
               <li><Link href="/tutorials" className="hover:text-foreground">Tutorials</Link></li>
+              <li><Link href="/pricing" className="hover:text-foreground">Pricing</Link></li>
               <li><Link href="/privacy" className="hover:text-foreground">Privacy</Link></li>
             </ul>
           </div>

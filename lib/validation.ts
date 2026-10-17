@@ -28,6 +28,12 @@ export const adminUserUpdateSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").max(200).optional(),
   role: z.enum(["ADMIN", "USER"]).optional(),
   disabled: z.boolean().optional(),
+  // Set by hand (e.g. paid by invoice/PayNow): no expiry until changed again.
+  plan: z.enum(["FREE", "STARTER", "PRO", "BUSINESS"]).optional(),
+});
+
+export const checkoutSchema = z.object({
+  plan: z.enum(["STARTER", "PRO", "BUSINESS"]),
 });
 
 export const otpRequestSchema = z.object({

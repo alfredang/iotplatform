@@ -19,6 +19,14 @@ enum Role {
   USER
 }
 
+// Subscription tiers — limits and prices live in lib/plans.ts.
+enum Plan {
+  FREE
+  STARTER
+  PRO
+  BUSINESS
+}
+
 enum Protocol {
   MQTT
   HTTP
@@ -74,6 +82,10 @@ model User {
   role              Role      @default(USER)
   disabled          Boolean   @default(false) // deactivated users cannot sign in
   mustChangePassword Boolean  @default(false) // signed up with an emailed default password
+  plan               Plan      @default(FREE)
+  planExpiresAt      DateTime? // paid period end (+grace); null = no expiry (e.g. set by an admin)
+  hitpayRecurringId  String?   @unique // HitPay recurring billing behind the current paid plan
+  subscriptionStatus String? // HitPay status: pending | active | canceled | ...
   orgName           String?
   notificationEmail String?
   theme             String    @default("dark")
@@ -488,4 +500,16 @@ model BlogReview {
   post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
+}
+
+// Fixed-window message counters per account ("m:<minute>" and "d:<day>"
+// buckets), shared by the web app and the MQTT worker. Old rows are pruned.
+model UsageCounter {
+  ownerId   String
+  bucket    String
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@id([ownerId, bucket])
+  @@index([createdAt])
 }

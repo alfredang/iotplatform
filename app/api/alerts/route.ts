@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { requireApiUser } from "@/lib/auth/rbac";
 import { alertRuleSchema } from "@/lib/validation";
+import { assertQuota } from "@/lib/usage";
 import { handleApiError, parseBody } from "@/lib/api";
 import { getOwnedDevice } from "@/lib/devices";
 import { resolveProject } from "@/lib/projects";
@@ -51,6 +52,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const user = await requireApiUser();
+    await assertQuota(user.id, "alertRules");
     const data = await parseBody(req, alertRuleSchema);
     await getOwnedDevice(data.deviceId, user.id);
 

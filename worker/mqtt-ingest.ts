@@ -14,6 +14,7 @@ import {
   resolveDeviceToken,
 } from "@/lib/telemetry/ingest";
 import { evaluateOffline } from "@/lib/alerts/evaluate";
+import { RateLimitError } from "@/lib/plans";
 import {
   TELEMETRY_TOPIC_WILDCARD,
   deviceIdFromTopic,
@@ -62,7 +63,8 @@ async function handleMessage(topic: string, raw: Buffer) {
     const result = await ingestForDevice(device, payload);
     log(`stored ${result.stored} metric(s) for ${device.deviceId}` + (result.alerts ? `, raised ${result.alerts} alert(s)` : ""));
   } catch (err) {
-    log("ingest error", err);
+    if (err instanceof RateLimitError) log(`rate limited ${device.deviceId}: ${err.message}`);
+    else log("ingest error", err);
   }
 }
 

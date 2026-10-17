@@ -1,4 +1,4 @@
-import { Cpu, Radio, Gauge, SlidersHorizontal, Workflow, UploadCloud, KeyRound, type LucideIcon } from "lucide-react";
+import { UserPlus, Cpu, Radio, Gauge, SlidersHorizontal, Workflow, UploadCloud, KeyRound, type LucideIcon } from "lucide-react";
 
 export type TutStep = {
   title: string;
@@ -22,8 +22,47 @@ export type Tutorial = {
 
 export const TUTORIALS: Tutorial[] = [
   {
-    slug: "add-your-first-device",
+    slug: "create-your-account",
     num: 1,
+    icon: UserPlus,
+    title: "Create your free account",
+    time: "2 min",
+    summary:
+      "Sign up with just your name and email, sign in with an emailed code, a password or Google, and everything is unlocked — devices, dashboards, API keys, alerts and automations.",
+    steps: [
+      {
+        title: "Sign up — it’s free",
+        body: "Open Create an account (Sign up on the home page) and enter your name and email. That’s all — no password to invent and no credit card. Prefer Google? Click Continue with Google instead and you’re in straight away.",
+        image: "/tutorials/t1-register.png",
+        caption: "Sign-up needs only a name and an email.",
+      },
+      {
+        title: "Check your inbox",
+        body: "We email you a welcome message, “Welcome to IoTFlow — your sign-in details”, with a default password. It usually arrives within a minute — check your spam folder if it doesn’t.",
+        image: "/tutorials/t1-check-inbox.png",
+        caption: "Sign in with the emailed password, or with a one-time code.",
+      },
+      {
+        title: "Sign in — three ways",
+        body: "On the sign-in page choose what suits you: Email code (the default) emails you a 6-digit code — no password needed; Password uses the default password from your welcome email; or Continue with Google.",
+        image: "/tutorials/t1-sign-in.png",
+        caption: "Email code, password or Google.",
+      },
+      {
+        title: "Set your own password",
+        body: "Right after your first sign-in you’re asked to choose your own password (at least 8 characters) — the emailed one stops working. You’ll use it in the IoTFlow mobile app too.",
+        image: "/tutorials/t1-set-password.png",
+        caption: "One-time step: replace the default password.",
+      },
+      {
+        title: "You’re in — everything is unlocked",
+        body: "Your first project, “My Project”, is ready on the dashboard. Every account can add devices, build dashboards, control devices, and create API keys, alert rules and n8n automations — nothing to request from an administrator. The Free plan covers 5 devices and 10,000 messages a day; see Plan & billing (or the Pricing page) if you need more. Next: add your first device.",
+      },
+    ],
+  },
+  {
+    slug: "add-your-first-device",
+    num: 2,
     icon: Cpu,
     title: "Add your first device",
     time: "2 min",
@@ -52,7 +91,7 @@ export const TUTORIALS: Tutorial[] = [
   },
   {
     slug: "send-your-first-reading",
-    num: 2,
+    num: 3,
     icon: Radio,
     title: "Send your first reading",
     time: "5 min",
@@ -111,7 +150,7 @@ iot.virtualWrite("temperature", 22.5);`,
   },
   {
     slug: "build-a-dashboard",
-    num: 3,
+    num: 4,
     icon: Gauge,
     title: "Build a dashboard",
     time: "3 min",
@@ -141,7 +180,7 @@ iot.virtualWrite("temperature", 22.5);`,
   },
   {
     slug: "control-a-device",
-    num: 4,
+    num: 5,
     icon: SlidersHorizontal,
     title: "Control a device",
     time: "5 min",
@@ -190,7 +229,7 @@ iot.loop_forever()`,
   },
   {
     slug: "automate-with-n8n",
-    num: 5,
+    num: 6,
     icon: Workflow,
     title: "Automate with n8n",
     time: "8 min",
@@ -216,11 +255,15 @@ iot.loop_forever()`,
         image: "/tutorials/t5-automations.png",
         caption: "The Automations page with live n8n connection and delivery status.",
       },
+      {
+        title: "Let the flow control devices back",
+        body: "To have n8n switch a relay or reply to a device, create an API key first (API Keys → Create API key — see Tutorial 8). IoTFlow puts your latest key in every event it sends as apiKey, so the flow can call POST /api/devices/<id>/command with it — no key to paste into n8n by hand.",
+      },
     ],
   },
   {
     slug: "esp8266-telemetry-upload",
-    num: 6,
+    num: 7,
     icon: UploadCloud,
     title: "Upload telemetry every 10 seconds (ESP8266 & Python)",
     time: "10 min",
@@ -235,7 +278,7 @@ iot.loop_forever()`,
       },
       {
         title: "Create the device and copy its token",
-        body: "Run the Add Device wizard (see Tutorial 1) and choose MQTT. Note the device id and the dev_… token — the token rides inside every telemetry message to authenticate it.",
+        body: "Run the Add Device wizard (see Tutorial 2) and choose MQTT. Note the device id and the dev_… token — the token rides inside every telemetry message to authenticate it.",
       },
       {
         title: "Find your broker address",
@@ -278,13 +321,13 @@ while True:
       },
       {
         title: "Watch it arrive, then visualise it",
-        body: "Open the Dashboard — a new reading lands under Latest Telemetry every 10 seconds. Bind Number, Gauge or Line-chart widgets to the temperature, humidity and voltage metrics (see Tutorial 3) and you have a live sensor feed.",
+        body: "Open the Dashboard — a new reading lands under Latest Telemetry every 10 seconds. Bind Number, Gauge or Line-chart widgets to the temperature, humidity and voltage metrics (see Tutorial 4) and you have a live sensor feed.",
       },
     ],
   },
   {
     slug: "api-keys-and-alerts",
-    num: 7,
+    num: 8,
     icon: KeyRound,
     title: "Create an API key and set up alerts",
     time: "6 min",
@@ -298,7 +341,7 @@ while True:
     steps: [
       {
         title: "Do you need an API key at all?",
-        body: "Every device already has its own device token (dev_…) on its device page — that’s all one board needs. An API key (iot_…) is one key for all your devices: handy for a gateway or script that reports for several of them. With an API key you include the device’s Device ID in every message.",
+        body: "To connect a board you don’t need one: every device has its own device token (dev_…), shown when you create it — that’s all one board needs. An API key (iot_…) is one key for all your devices, and any account can create one. Use it for (1) a gateway or script that reports for several devices — include the device’s Device ID in every message; (2) sending commands to your devices from your own code; and (3) n8n automations that control devices back (Tutorial 6), which use your key automatically.",
       },
       {
         title: "Create the API key",
@@ -334,13 +377,13 @@ requests.post("https://YOUR-HOST/api/telemetry",
       },
       {
         title: "Trigger it, then resolve it",
-        body: "Send a reading above the threshold (e.g. temperature 34.5). Within seconds the alert appears under Active alerts and in the mobile app. Click Resolve once it’s handled; while an alert is active the same rule won’t raise duplicates. To forward alerts to Telegram, Slack, email or a sheet, add an Automation with the Alert trigger (Tutorial 5).",
+        body: "Send a reading above the threshold (e.g. temperature 34.5). Within seconds the alert appears under Active alerts and in the mobile app. Click Resolve once it’s handled; while an alert is active the same rule won’t raise duplicates. To forward alerts to Telegram, Slack, email or a sheet, add an Automation with the Alert trigger (Tutorial 6).",
         image: "/tutorials/t7-active-alert.jpg",
         caption: "The triggered alert, ready to resolve.",
       },
       {
         title: "Get the mobile app",
-        body: "iPhone / iPad: search “IoTFlow” on the App Store (apps.apple.com/us/app/iotflow/id6781005693). Android is in closed testing — contact us with your Gmail to join as a tester. Sign in with the same email and password as the website; if you registered with Google, set a password first via Forgot password. Dashboards, controls, devices and alerts are all there.",
+        body: "iPhone / iPad: search “IoTFlow” on the App Store (apps.apple.com/us/app/iotflow/id6781005693). Android is in closed testing — contact us with your Gmail to join as a tester. Sign in with the same email and the password you set after your first sign-in; if you signed up with Google, set a password first via Forgot password. Dashboards, controls, devices and alerts are all there.",
       },
     ],
   },

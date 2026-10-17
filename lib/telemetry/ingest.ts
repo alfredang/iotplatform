@@ -1,4 +1,5 @@
 import type { Device } from "@prisma/client";
+import { consumeMessages } from "@/lib/usage";
 import { prisma } from "@/lib/db/prisma";
 import { hashToken } from "@/lib/tokens";
 import { evaluateMetric } from "@/lib/alerts/evaluate";
@@ -50,6 +51,8 @@ export async function ingestForDevice(
   payload: unknown,
   receivedAt = new Date(),
 ): Promise<IngestResult> {
+  // Throws RateLimitError when the owner's plan allowance is used up.
+  await consumeMessages(device.ownerId);
   const { readings, latitude, longitude } = normalizePayload(payload);
 
   if (readings.length > 0) {

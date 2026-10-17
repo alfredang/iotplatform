@@ -17,6 +17,7 @@ export function SiteHeader() {
           <Link href="/#features" className="hover:text-foreground">Features</Link>
           <Link href="/#how" className="hover:text-foreground">How it works</Link>
           <Link href="/tutorials" className="hover:text-foreground">Tutorials</Link>
+          <Link href="/pricing" className="hover:text-foreground">Pricing</Link>
           <Link href="/blog" className="hover:text-foreground">Blog</Link>
           <Link href="/#industries" className="hover:text-foreground">Industries</Link>
           <Link href="/#contact" className="hover:text-foreground">Contact</Link>

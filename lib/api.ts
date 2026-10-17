@@ -1,5 +1,6 @@
 import { ZodError, type ZodType } from "zod";
 import { AuthError } from "@/lib/auth/rbac";
+import { QuotaError, RateLimitError } from "@/lib/plans";
 
 /** Parse a Request's JSON body against a Zod schema, throwing on failure. */
 export async function parseBody<T>(req: Request, schema: ZodType<T>): Promise<T> {
@@ -31,6 +32,15 @@ export function handleApiError(err: unknown): Response {
   }
   if (err instanceof ValidationError) {
     return Response.json({ error: err.message }, { status: 400 });
+  }
+  if (err instanceof RateLimitError) {
+    return Response.json(
+      { error: err.message, upgrade: "/pricing" },
+      { status: 429, headers: { "Retry-After": String(err.retryAfterSeconds) } },
+    );
+  }
+  if (err instanceof QuotaError) {
+    return Response.json({ error: err.message, upgrade: "/pricing" }, { status: 403 });
   }
   // eslint-disable-next-line no-console
   console.error(err);

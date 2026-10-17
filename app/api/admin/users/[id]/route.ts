@@ -4,10 +4,11 @@ import { bustRoleCache } from "@/lib/auth/auth";
 import { requireAdminApi, AuthError } from "@/lib/auth/rbac";
 import { handleApiError, parseBody } from "@/lib/api";
 import { adminUserUpdateSchema } from "@/lib/validation";
+import { bustPlanCache } from "@/lib/usage";
 
 type Ctx = { params: Promise<{ id: string }> };
 
-/** PATCH /api/admin/users/:id — edit profile, credentials, role or activation (admin only). */
+/** PATCH /api/admin/users/:id — edit profile, credentials, role, plan or activation (admin only). */
 export async function PATCH(req: Request, { params }: Ctx) {
   try {
     const admin = await requireAdminApi();
@@ -43,10 +44,12 @@ export async function PATCH(req: Request, { params }: Ctx) {
         ...(body.password ? { hashedPassword: bcrypt.hashSync(body.password, 10) } : {}),
         ...(body.role ? { role: body.role } : {}),
         ...(typeof body.disabled === "boolean" ? { disabled: body.disabled } : {}),
+        ...(body.plan ? { plan: body.plan, planExpiresAt: null } : {}),
       },
-      select: { id: true, name: true, email: true, role: true, disabled: true },
+      select: { id: true, name: true, email: true, role: true, disabled: true, plan: true },
     });
     bustRoleCache(id);
+    bustPlanCache(id);
     return Response.json({ user });
   } catch (err) {
     return handleApiError(err);

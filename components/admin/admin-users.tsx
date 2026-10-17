@@ -1,5 +1,6 @@
 "use client";
 
+import { PLANS, PLAN_ORDER } from "@/lib/plans";
 import { useState } from "react";
 import useSWR from "swr";
 import { Pencil, Trash2, UserPlus } from "lucide-react";
@@ -17,6 +18,8 @@ type AdminUser = {
   name: string | null;
   email: string;
   role: "ADMIN" | "USER";
+  plan: "FREE" | "STARTER" | "PRO" | "BUSINESS";
+  planExpiresAt: string | null;
   disabled: boolean;
   createdAt: string;
   _count: { devices: number; projects: number };
@@ -211,6 +214,7 @@ export function AdminUsers({ currentUserId }: { currentUserId: string }) {
                 <tr>
                   <th className="px-4 py-3 font-medium">User</th>
                   <th className="px-4 py-3 font-medium">Role</th>
+                  <th className="px-4 py-3 font-medium">Plan</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Projects / Devices</th>
                   <th className="px-4 py-3 font-medium">Joined</th>
@@ -236,6 +240,31 @@ export function AdminUsers({ currentUserId }: { currentUserId: string }) {
                           <option value="USER">User</option>
                           <option value="ADMIN">Admin</option>
                         </Select>
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.role === "ADMIN" ? (
+                          <span className="text-xs text-muted">Unlimited</span>
+                        ) : (
+                          <>
+                            <Select
+                              value={u.plan}
+                              onChange={(e) => patch(u.id, { plan: e.target.value })}
+                              className="h-8 w-32"
+                              aria-label={`Plan for ${u.email}`}
+                            >
+                              {PLAN_ORDER.map((p) => (
+                                <option key={p} value={p}>
+                                  {PLANS[p].name}
+                                </option>
+                              ))}
+                            </Select>
+                            {u.planExpiresAt && (
+                              <p className="mt-1 text-xs text-muted">
+                                renews by {new Date(u.planExpiresAt).toLocaleDateString()}
+                              </p>
+                            )}
+                          </>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <Badge tone={u.disabled ? "muted" : "success"}>

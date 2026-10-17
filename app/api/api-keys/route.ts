@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { requireApiUser } from "@/lib/auth/rbac";
 import { apiKeySchema } from "@/lib/validation";
+import { assertQuota } from "@/lib/usage";
 import { handleApiError, parseBody } from "@/lib/api";
 import { generateApiKey } from "@/lib/tokens";
 import { encryptSecret } from "@/lib/crypto";
@@ -29,6 +30,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const user = await requireApiUser();
+    await assertQuota(user.id, "apiKeys");
     const { name } = await parseBody(req, apiKeySchema);
     const key = generateApiKey();
     const created = await prisma.apiKey.create({

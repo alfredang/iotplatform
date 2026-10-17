@@ -107,6 +107,13 @@ log or call AI.
   automations (all owner-scoped); the Admin area (users, blog, enquiries,
   settings) is admin-only. Role changes apply live — no re-login needed.
 - **Maps** — OpenStreetMap view of GPS-enabled devices.
+- **Plans & pricing** — public `/pricing` page with a Free tier and paid
+  Starter / Pro / Business tiers (SGD, monthly, via **HitPay** recurring
+  billing). Each plan caps devices, API keys, alert rules, automations and
+  device messages per minute / per day (HTTP 429 when exceeded; MQTT messages
+  are dropped); admins are unlimited. Users see usage on **Plan & billing**;
+  admins can set any user's plan in Admin → Users. Limits live in
+  `lib/plans.ts`.
 - **API keys** — account-level keys for HTTP telemetry submission and n8n callbacks.
 - **Industry-focused landing page** — agriculture, industrial, smart home, energy,
   healthcare, buildings, logistics, water and retail use cases.
@@ -163,7 +170,7 @@ log or call AI.
 ```
 iotplatform/
 ├── app/
-│   ├── (marketing)/        # landing page, blog, tutorials, integrate, privacy
+│   ├── (marketing)/        # landing page, pricing, blog, tutorials, integrate, privacy
 │   ├── (auth)/             # two-column sign-in: login, register, change-password,
 │   │                       # verify-email, forgot-password
 │   ├── (dashboard)/        # dashboard, devices, telemetry, alerts, automations, maps,
@@ -258,6 +265,7 @@ See [`.env.example`](.env.example). Key ones:
 | `GMAIL_SERVICE_ACCOUNT_JSON` | Preferred Gmail transport: a service-account key with domain-wide delegation, sending as `GMAIL_USER` — unlike the refresh token it survives mailbox password changes |
 | `SMTP_*` | SMTP fallback for email (codes log to console if nothing is set) |
 | `MQTT_BROKER_URL` | Broker the worker + downlink publisher connect to |
+| `HITPAY_API_KEY` + `HITPAY_SALT` + `HITPAY_WEBHOOK_SALT` (+ `HITPAY_SANDBOX`) | Paid-plan checkout via HitPay recurring billing; webhook at `/api/billing/hitpay/webhook` |
 | `NEXT_PUBLIC_MQTT_HOST` | `host:port` shown in device sample code |
 | `DEVICE_OFFLINE_SECONDS` | Mark a device offline after this idle period |
 | `N8N_BASE_URL` | Your n8n instance URL (enables the Automations page) |
@@ -383,6 +391,10 @@ data logger, daily summary) with step-by-step setup instructions:
 | `POST` | `/api/enquiry` | Submit a landing-page enquiry |
 | `POST` | `/api/auth/register` | Create an account — name + email emails a default password; with `password` (mobile) it requires email verification |
 | `POST` | `/api/account/password` | Change the signed-in user's password (clears the forced change after a default password) |
+| `GET` | `/api/billing` | Current plan, limits and usage |
+| `POST` | `/api/billing/checkout` | Start a HitPay monthly subscription (`{ plan }`) → hosted checkout URL |
+| `POST` | `/api/billing/cancel` | Stop renewing (plan kept until the paid period ends) |
+| `POST` | `/api/billing/hitpay/webhook` | HitPay webhook (signature-verified) |
 | `GET/POST` | `/api/devices` | List / create devices |
 | `GET/PUT/DELETE` | `/api/devices/:id` | Read / update / delete a device |
 | `POST` | `/api/devices/:id/token` | Regenerate device token |

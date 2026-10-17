@@ -17,6 +17,8 @@ export async function GET() {
         name: true,
         email: true,
         role: true,
+        plan: true,
+        planExpiresAt: true,
         disabled: true,
         createdAt: true,
         _count: { select: { devices: true, projects: true } },

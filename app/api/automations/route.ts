@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { requireApiUser, AuthError } from "@/lib/auth/rbac";
 import { automationSchema } from "@/lib/validation";
+import { assertQuota } from "@/lib/usage";
 import { handleApiError, parseBody } from "@/lib/api";
 import { resolveProject } from "@/lib/projects";
 
@@ -26,6 +27,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const user = await requireApiUser();
+    await assertQuota(user.id, "automations");
     const url = new URL(req.url);
     const project = await resolveProject(user.id, url.searchParams.get("projectId"));
     const data = await parseBody(req, automationSchema);
