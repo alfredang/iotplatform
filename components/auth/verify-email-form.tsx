@@ -56,8 +56,8 @@ export function VerifyEmailForm() {
   }
 
   return (
-    <div className="rounded-card border border-border bg-surface p-6 shadow-sm">
-      <h1 className="text-xl font-semibold">Verify your email</h1>
+    <div>
+      <h1 className="text-[28px] font-semibold leading-tight">Verify your email</h1>
       <p className="mt-1 text-sm text-muted">
         Enter your email and we&apos;ll send you a 6-digit verification code.
       </p>

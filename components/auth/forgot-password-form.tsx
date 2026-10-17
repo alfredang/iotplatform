@@ -56,8 +56,8 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="rounded-card border border-border bg-surface p-6 shadow-sm">
-      <h1 className="text-xl font-semibold">Reset your password</h1>
+    <div>
+      <h1 className="text-[28px] font-semibold leading-tight">Reset your password</h1>
       <p className="mt-1 text-sm text-muted">
         We&apos;ll email you a code to set a new password.
       </p>

@@ -73,6 +73,7 @@ model User {
   hashedPassword    String?
   role              Role      @default(USER)
   disabled          Boolean   @default(false) // deactivated users cannot sign in
+  mustChangePassword Boolean  @default(false) // signed up with an emailed default password
   orgName           String?
   notificationEmail String?
   theme             String    @default("dark")

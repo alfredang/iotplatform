@@ -2,14 +2,24 @@ import { z } from "zod";
 
 const email = z.string().trim().toLowerCase().email("Enter a valid email");
 
+const newPassword = z.string().min(8, "Password must be at least 8 characters").max(200);
+
+// Web sign-up omits the password (a default one is emailed); the mobile apps
+// still send one.
 export const registerSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(120),
   email,
-  password: z.string().min(8, "Password must be at least 8 characters").max(200),
+  password: newPassword.optional(),
 });
 
 export const adminUserCreateSchema = registerSchema.extend({
+  password: newPassword,
   role: z.enum(["ADMIN", "USER"]).default("USER"),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().max(200).optional(),
+  password: newPassword,
 });
 
 export const adminUserUpdateSchema = z.object({

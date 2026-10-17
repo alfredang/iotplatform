@@ -44,8 +44,9 @@ alert rule and fully populated dashboards so you can explore immediately.
 (The [live demo](https://iot.tertiaryinfotech.com) is not seeded — register your
 own account or use Google sign-in.)
 
-> On a fresh install with no seed, the **first account you register becomes an
-> Admin** automatically — so you can set up locally with no manual steps.
+> Accounts created through the sign-up form (or a first-time email-code sign-in)
+> are **Admins** — so a fresh install needs no manual setup. Google/GitHub
+> sign-ups start as regular Users; promote them from Admin → Users.
 
 ---
 
@@ -83,10 +84,13 @@ log or call AI.
   with active/resolve workflow (and every alert can trigger an n8n flow).
 - **Projects** — each project is a self-contained workspace with its own devices,
   dashboard, automations, alerts and map; switch projects from the sidebar.
-- **Authentication** — email/password with **email verification** (6-digit code
-  at sign-up), passwordless **OTP email login**, **Sign in with Google** (client
-  configurable at runtime from Admin → Settings, no redeploy) and GitHub OAuth;
-  forgot-password via emailed reset code; Admin & User roles.
+- **Authentication** — two-column sign-in page offering a passwordless **email
+  code** (default), **password**, **Sign in with Google** (client configurable at
+  runtime from Admin → Settings, no redeploy) and GitHub OAuth. Sign-up asks only
+  for name + email and sends a **welcome email with a default password**; the user
+  must set their own password right after the first sign-in. Forgot-password via
+  emailed reset code; Admin & User roles. (The mobile apps still register with a
+  chosen password, confirmed by a 6-digit email code.)
 - **Blog / CMS** — admin-authored posts with categories, tags, social likes and
   star reviews; public `/blog` with category/tag filters. Ships 11 IoT + n8n
   articles (10 project builds, each with an n8n workflow diagram).
@@ -94,7 +98,8 @@ log or call AI.
   covering the whole loop: connect → visualise → control → automate.
 - **Admin area** — full account management (create, edit, change role,
   deactivate, delete users), API keys, blog and enquiries; a **Settings** page
-  stores email (**Gmail OAuth2** or SMTP, with a send-test-email button),
+  stores email (**Gmail service account**, **Gmail OAuth2** or SMTP, with a
+  send-test-email button),
   **Sign in with Google**, **n8n** and **MQTT** config in the database (env vars
   are the fallback). **View as** lets admins preview as a user; any signed-in
   user can create projects, dashboards and devices (owner-scoped, with
@@ -121,7 +126,7 @@ log or call AI.
 | MQTT | Eclipse Mosquitto broker + a Node ingestion worker (`mqtt`); server-side publisher for downlink control |
 | Automation | n8n (webhook events out + REST callbacks in) |
 | Mobile | Native iOS app ([App Store](https://apps.apple.com/us/app/iotflow/id6781005693)) · Installable PWA (web app manifest) |
-| Email | Nodemailer — Gmail OAuth2 (XOAUTH2) or plain SMTP |
+| Email | Nodemailer — Gmail service account (domain-wide delegation), Gmail OAuth2 (XOAUTH2) or plain SMTP |
 | Deploy | Docker · Docker Compose · Coolify |
 
 ---
@@ -158,7 +163,8 @@ log or call AI.
 iotplatform/
 ├── app/
 │   ├── (marketing)/        # landing page, blog, tutorials, integrate, privacy
-│   ├── (auth)/             # login, register, verify-email, forgot-password, verify-otp
+│   ├── (auth)/             # two-column sign-in: login, register, change-password,
+│   │                       # verify-email, forgot-password
 │   ├── (dashboard)/        # dashboard, devices, telemetry, alerts, automations, maps,
 │   │                       # api-keys, integrate, getting-started, admin (users/blog/enquiries/settings)
 │   ├── api/                # route handlers (devices, telemetry, commands, automations,
@@ -248,6 +254,7 @@ See [`.env.example`](.env.example). Key ones:
 | `GOOGLE_CLIENT_ID/SECRET` | Enables the Google login button (or set it in Admin → Settings) |
 | `GITHUB_CLIENT_ID/SECRET` | Enables the GitHub login button |
 | `GMAIL_USER` + `GMAIL_CLIENT_ID/SECRET` + `GMAIL_REFRESH_TOKEN` | Send email via Gmail OAuth2 — mint the refresh token with `node scripts/gmail-oauth.mjs` (or set it all in Admin → Settings) |
+| `GMAIL_SERVICE_ACCOUNT_JSON` | Preferred Gmail transport: a service-account key with domain-wide delegation, sending as `GMAIL_USER` — unlike the refresh token it survives mailbox password changes |
 | `SMTP_*` | SMTP fallback for email (codes log to console if nothing is set) |
 | `MQTT_BROKER_URL` | Broker the worker + downlink publisher connect to |
 | `NEXT_PUBLIC_MQTT_HOST` | `host:port` shown in device sample code |
@@ -373,7 +380,8 @@ data logger, daily summary) with step-by-step setup instructions:
 |---|---|---|
 | `GET` | `/api/health` | Health + DB check |
 | `POST` | `/api/enquiry` | Submit a landing-page enquiry |
-| `POST` | `/api/auth/register` | Create an account |
+| `POST` | `/api/auth/register` | Create an account — name + email emails a default password; with `password` (mobile) it requires email verification |
+| `POST` | `/api/account/password` | Change the signed-in user's password (clears the forced change after a default password) |
 | `GET/POST` | `/api/devices` | List / create devices |
 | `GET/PUT/DELETE` | `/api/devices/:id` | Read / update / delete a device |
 | `POST` | `/api/devices/:id/token` | Regenerate device token |

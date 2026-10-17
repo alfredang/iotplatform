@@ -2,20 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { MailCheck } from "lucide-react";
 import { apiFetch } from "@/lib/client";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/misc";
 import { SocialButtons, OrDivider } from "./social-buttons";
 
 export function RegisterForm({ google, github }: { google: boolean; github: boolean }) {
-  const router = useRouter();
-  const [step, setStep] = useState<"details" | "verify">("details");
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [code, setCode] = useState("");
-  const [devCode, setDevCode] = useState<string | undefined>();
+  const [form, setForm] = useState({ name: "", email: "" });
+  const [sent, setSent] = useState(false);
+  const [devPassword, setDevPassword] = useState<string | undefined>();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -29,12 +26,12 @@ export function RegisterForm({ google, github }: { google: boolean; github: bool
     setError("");
     setLoading(true);
     try {
-      const res = await apiFetch<{ devCode?: string }>("/api/auth/register", {
+      const res = await apiFetch<{ devPassword?: string }>("/api/auth/register", {
         method: "POST",
         body: JSON.stringify(form),
       });
-      setDevCode(res.devCode);
-      setStep("verify");
+      setDevPassword(res.devPassword);
+      setSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not register");
     } finally {
@@ -42,108 +39,79 @@ export function RegisterForm({ google, github }: { google: boolean; github: bool
     }
   }
 
-  async function onVerify(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      await apiFetch("/api/auth/verify-email", {
-        method: "POST",
-        body: JSON.stringify({ email: form.email, code }),
-      });
-      // Auto sign-in after successful verification.
-      const res = await signIn("credentials", {
-        email: form.email,
-        password: form.password,
-        redirect: false,
-      });
-      if (res?.error) {
-        router.push("/login");
-        return;
-      }
-      router.push("/dashboard");
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not verify");
-      setLoading(false);
-    }
-  }
-
-  async function resend() {
-    setError("");
-    try {
-      const res = await apiFetch<{ devCode?: string }>("/api/auth/otp/request", {
-        method: "POST",
-        body: JSON.stringify({ email: form.email, purpose: "verify" }),
-      });
-      setDevCode(res.devCode);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not resend code");
-    }
-  }
-
-  if (step === "verify") {
+  if (sent) {
+    const email = encodeURIComponent(form.email);
     return (
-      <div className="rounded-card border border-border bg-surface p-6 shadow-sm">
-        <h1 className="text-xl font-semibold">Verify your email</h1>
-        <p className="mt-1 text-sm text-muted">
-          We emailed a 6-digit code to <span className="font-medium text-foreground">{form.email}</span>.
+      <div>
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
+          <MailCheck className="h-5 w-5" />
+        </span>
+        <h1 className="mt-4 text-[28px] font-semibold leading-tight">Check your inbox</h1>
+        <p className="mt-2 text-sm text-muted">
+          We sent a welcome email to{" "}
+          <span className="font-medium text-foreground">{form.email}</span>{" "}with your default
+          password. Sign in with it — or with a one-time code — and you&apos;ll be asked to set
+          your own password straight away.
         </p>
 
-        <form onSubmit={onVerify} className="mt-6 space-y-4">
-          {devCode && (
-            <p className="rounded-lg bg-warning/15 p-3 text-center text-sm text-warning">
-              Dev mode (no email configured) — your code is{" "}
-              <span className="font-mono font-semibold">{devCode}</span>
-            </p>
-          )}
-          <Field label="6-digit code" htmlFor="code">
-            <Input
-              id="code"
-              inputMode="numeric"
-              maxLength={6}
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="000000"
-              className="text-center font-mono text-lg tracking-[0.4em]"
-            />
-          </Field>
-          {error && <p className="text-sm text-danger">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Spinner />} Verify &amp; sign in
-          </Button>
-          <button
-            type="button"
-            onClick={resend}
-            className="w-full text-center text-sm text-muted hover:underline"
+        {devPassword && (
+          <p className="mt-4 rounded-lg bg-warning/15 p-3 text-center text-sm text-warning">
+            Dev mode (no email configured) — your default password is{" "}
+            <span className="font-mono font-semibold">{devPassword}</span>
+          </p>
+        )}
+
+        <div className="mt-6 space-y-2">
+          <Link
+            href={`/login?method=password&email=${email}`}
+            className={buttonClass({ className: "w-full" })}
           >
-            Resend code
-          </button>
-        </form>
+            Sign in with password
+          </Link>
+          <Link
+            href={`/login?email=${email}`}
+            className={buttonClass({ variant: "outline", className: "w-full" })}
+          >
+            Sign in with an email code
+          </Link>
+        </div>
+        <p className="mt-6 text-center text-sm text-muted">
+          No email after a few minutes? Check your spam folder.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-card border border-border bg-surface p-6 shadow-sm">
-      <h1 className="text-xl font-semibold">Create your account</h1>
-      <p className="mt-1 text-sm text-muted">Start connecting devices in minutes.</p>
+    <div>
+      <p className="text-xs font-medium uppercase tracking-wider text-primary">Get started</p>
+      <h1 className="mt-1 text-[28px] font-semibold leading-tight">Create your account</h1>
+      <p className="mt-2 text-sm text-muted">
+        We&apos;ll email you a default password to sign in with.
+      </p>
 
-      <div className="mt-6">
-        <SocialButtons google={google} github={github} />
-        {(google || github) && <OrDivider label="or sign up with email" />}
-      </div>
-
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <Field label="Name" htmlFor="name">
-          <Input id="name" required value={form.name} onChange={set("name")} placeholder="Jane Doe" />
+          <Input
+            id="name"
+            required
+            autoComplete="name"
+            autoFocus
+            value={form.name}
+            onChange={set("name")}
+            placeholder="Jane Doe"
+          />
         </Field>
         <Field label="Email" htmlFor="email">
-          <Input id="email" type="email" required value={form.email} onChange={set("email")} placeholder="you@example.com" />
-        </Field>
-        <Field label="Password" htmlFor="password" hint="At least 8 characters.">
-          <Input id="password" type="password" required value={form.password} onChange={set("password")} placeholder="••••••••" />
+          <Input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={form.email}
+            onChange={set("email")}
+            placeholder="you@example.com"
+          />
         </Field>
         {error && <p className="text-sm text-danger">{error}</p>}
         <Button type="submit" className="w-full" disabled={loading}>
@@ -151,7 +119,14 @@ export function RegisterForm({ google, github }: { google: boolean; github: bool
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-muted">
+      {(google || github) && (
+        <>
+          <OrDivider label="or" />
+          <SocialButtons google={google} github={github} />
+        </>
+      )}
+
+      <p className="mt-8 text-center text-sm text-muted">
         Already have an account?{" "}
         <Link href="/login" className="text-primary hover:underline">
           Sign in

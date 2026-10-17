@@ -7,6 +7,8 @@ declare module "next-auth" {
     user: {
       id: string;
       role: Role;
+      /** Still on the emailed default password — must set their own. */
+      mustChangePassword?: boolean;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -15,6 +17,7 @@ declare module "next-auth" {
 
   interface User {
     role?: Role;
+    mustChangePassword?: boolean;
   }
 }
 
@@ -22,5 +25,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
     role?: Role;
+    mustChangePassword?: boolean;
   }
 }

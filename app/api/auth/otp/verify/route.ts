@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
 import { verifyOtp } from "@/lib/otp";
+import { bustRoleCache } from "@/lib/auth/auth";
 import { otpResetSchema } from "@/lib/validation";
 import { handleApiError, parseBody } from "@/lib/api";
 
@@ -24,8 +25,10 @@ export async function POST(req: Request) {
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { hashedPassword: bcrypt.hashSync(password, 10) },
+      // A password of their own replaces any emailed default one.
+      data: { hashedPassword: bcrypt.hashSync(password, 10), mustChangePassword: false },
     });
+    bustRoleCache(user.id);
 
     return Response.json({ ok: true });
   } catch (err) {

@@ -1,7 +1,6 @@
-import { OtpLoginForm } from "@/components/auth/otp-login-form";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "One-time code · IoTFlow" };
-
+// One-time-code sign-in now lives on /login (it's the default method there).
 export default function VerifyOtpPage() {
-  return <OtpLoginForm />;
+  redirect("/login");
 }

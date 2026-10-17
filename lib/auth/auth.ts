@@ -33,10 +33,24 @@ const credentialProviders: NextAuthConfig["providers"] = [
       const ok = await bcrypt.compare(password, user.hashedPassword);
       if (!ok) return null;
 
-      // Registered but never confirmed the emailed code.
-      if (!user.emailVerified) throw new EmailNotVerified();
+      if (!user.emailVerified) {
+        // Registered but never confirmed the emailed code.
+        if (!user.mustChangePassword) throw new EmailNotVerified();
+        // The default password only ever went to this inbox, so signing in
+        // with it proves ownership of the address.
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() },
+        });
+      }
 
-      return { id: user.id, email: user.email, name: user.name, role: user.role };
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        mustChangePassword: user.mustChangePassword,
+      };
     },
   }),
   Credentials({
@@ -64,7 +78,13 @@ const credentialProviders: NextAuthConfig["providers"] = [
         update: { emailVerified: new Date() },
         create: { email, emailVerified: new Date(), role: "ADMIN" },
       });
-      return { id: user.id, email: user.email, name: user.name, role: user.role };
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        mustChangePassword: user.mustChangePassword,
+      };
     },
   }),
 ];
@@ -104,23 +124,33 @@ export function bustOAuthCache() {
 // The JWT caches the role from sign-in time; without a refresh, promotions,
 // demotions and deactivations wouldn't apply until the user logs in again.
 // Lookups are cached briefly because auth() runs on every request.
-let roleCache = new Map<string, { role: Role; disabled: boolean; ts: number }>();
+// The cache lives on globalThis: Next bundles route handlers and pages
+// separately, each with its own copy of this module, so a module-level Map
+// busted from an API route would leave the pages' copy stale.
+type RoleEntry = { role: Role; disabled: boolean; mustChangePassword: boolean; ts: number };
+const roleCacheHolder = globalThis as typeof globalThis & {
+  __iotflowRoleCache?: Map<string, RoleEntry>;
+};
+const roleCache = (roleCacheHolder.__iotflowRoleCache ??= new Map());
 const ROLE_CACHE_TTL_MS = 30_000;
 
 async function getFreshRole(userId: string) {
   const hit = roleCache.get(userId);
   if (hit && Date.now() - hit.ts < ROLE_CACHE_TTL_MS) return hit;
   const user = await prisma.user
-    .findUnique({ where: { id: userId }, select: { role: true, disabled: true } })
+    .findUnique({
+      where: { id: userId },
+      select: { role: true, disabled: true, mustChangePassword: true },
+    })
     .catch(() => null);
   if (!user) return null;
-  const entry = { role: user.role, disabled: user.disabled, ts: Date.now() };
+  const entry = { ...user, ts: Date.now() };
+  if (roleCache.size >= 10_000) roleCache.clear();
   roleCache.set(userId, entry);
-  if (roleCache.size > 10_000) roleCache = new Map([[userId, entry]]);
   return entry;
 }
 
-/** Call after changing a user's role or activation so it applies immediately. */
+/** Call after changing a user's role, activation or password so it applies immediately. */
 export function bustRoleCache(userId?: string) {
   if (userId) roleCache.delete(userId);
   else roleCache.clear();
@@ -178,6 +208,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => ({
       if (user) {
         token.id = user.id as string;
         token.role = user.role ?? "USER";
+        token.mustChangePassword = user.mustChangePassword ?? false;
         return token;
       }
       const id = (token.id as string) ?? token.sub;
@@ -185,6 +216,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => ({
       const fresh = await getFreshRole(id);
       if (!fresh || fresh.disabled) return null; // deleted/deactivated → end session
       token.role = fresh.role;
+      token.mustChangePassword = fresh.mustChangePassword;
       return token;
     },
   },
